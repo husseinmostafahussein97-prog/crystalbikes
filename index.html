@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Shop System</title>
+<style>
+:root{--bg:#f4f6f1;--fg:#1c261c;--card:#fff;--mut:#6a7468;--bd:#d8ddd2;--pri:#2e7d32;--pf:#fff;--bad:#c0392b;--wrn:#d98400;--ok:#2e7d32;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101510;--fg:#e8efe6;--card:#1a211a;--mut:#98a395;--bd:#2c372b;--pri:#66bb6a;--pf:#0c140c;--bad:#ef7b6f;--wrn:#f0b04a;--ok:#66bb6a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#101510;--fg:#e8efe6;--card:#1a211a;--mut:#98a395;--bd:#2c372b;--pri:#66bb6a;--pf:#0c140c;--bad:#ef7b6f;--wrn:#f0b04a;--ok:#66bb6a;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--pri);color:var(--pf)}
+header b{font-size:17px}
+.chip{border:1px solid currentColor;border-radius:99px;padding:1px 9px;font-size:12px;margin-inline-start:6px}
+nav{display:flex;gap:6px;padding:10px 12px;overflow-x:auto}
+nav button{flex:none}
+main{padding:0 12px 24px;max-width:900px;margin:0 auto}
+button,select,input{font:inherit;color:var(--fg)}
+button{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:9px 14px;cursor:pointer}
+button.on{background:var(--pri);color:var(--pf);border-color:var(--pri)}
+button:disabled{opacity:.45;cursor:not-allowed}
+select,input{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:9px 10px;width:100%}
+input.sm{width:64px;padding:6px}
+input.md{width:104px;padding:6px}
+label{display:block;font-size:13px;color:var(--mut);margin:12px 0 4px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-top:10px}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1}
+.st{display:flex;align-items:center;gap:14px}.st button{width:48px;font-size:20px}.st b{font-size:22px;min-width:30px;text-align:center}
+#tot{font-size:22px;margin:16px 0 4px}
+.m{color:var(--mut);font-size:13px;font-weight:400}
+#sv{width:100%;padding:14px;font-size:17px;background:var(--pri);color:var(--pf);border-color:var(--pri)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.k{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px}.k b{display:block;font-size:19px}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}th,td{padding:7px 8px;border-bottom:1px solid var(--bd);text-align:start;white-space:nowrap}th{color:var(--mut);font-weight:600}
+.b{border-radius:6px;padding:1px 8px;font-size:12px;font-weight:700;border:1px solid currentColor}.b.ok{color:var(--ok)}.b.wrn{color:var(--wrn)}.b.bad{color:var(--bad)}
+h3{margin:18px 0 4px}
+#lo{padding:3px 10px;margin-inline-start:8px;font-size:13px}
+.cols{display:flex;gap:2px;height:150px;margin-bottom:18px}.cols>div{flex:1;position:relative;display:flex;align-items:flex-end}.cols i{display:block;width:100%;background:var(--pri);border-radius:3px 3px 0 0}.cols span{position:absolute;bottom:-15px;left:0;right:0;text-align:center;font-size:9px;color:var(--mut)}
+.hb{display:grid;grid-template-columns:110px 1fr auto;gap:8px;align-items:center;margin:6px 0}.hb i{display:block;height:14px;background:var(--pri);border-radius:4px}.hb span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 18px;border-radius:99px;display:none;z-index:9}
+</style></head><body>
+<header><b>🛵 Shop System</b><span><button id="lg" data-a="lang" style="padding:3px 10px;font-size:13px">العربية</button> <span id="who"></span></span></header>
+<nav id="nav"></nav><main id="v"><p class="card">Loading…</p></main><p class="m" style="text-align:center;margin:8px 0 24px">Version 15 – no conversion, per currency</p>
+<div id="toast"></div>
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
+<script>
+const D=["Half Hour","One Hour","Two Hours","Day","Week"],P=["Cash EGP","Visa","Cash USD","Cash EUR"],TN={rent:"Rent",sale:"Sale",maint:"Maintenance"};
+const $=s=>document.querySelector(s),today=()=>new Date().toLocaleDateString("en-CA");
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const n0=x=>Math.round(x).toLocaleString("en-US");
+let db,usr,dl,me,admin=false,cfg=null,prods=[],txs=[],names={},tab="new",built=false,armed="",
+F={type:"rent",qty:1,pay:"Cash EGP"},flt={from:today(),to:today(),type:"",by:""};
+const rate=c=>c==="USD"?cfg.rates.USD:c==="EUR"?cfg.rates.EUR:1;
+const pcur=p=>p==="Cash USD"?"USD":p==="Cash EUR"?"EUR":"EGP";
+const pEGP=p=>(p.cur==="USD"||p.cur==="EUR")?p.price*rate(p.cur):p.price;
+const nm=id=>names[id]||"Staff";
+const toast=t=>{const e=$("#toast");e.textContent=t;tr(e);e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",2600)};
+
+let ed=null,E={},X={},exps=[],fxs=[],rets=[],ccs=[],CC={},FX={},cr={from:today().slice(0,8)+"01",to:today()},rm=today().slice(0,7),rc="EGP",lang="en";try{lang=localStorage.getItem("lang")||"en"}catch(e){}
+const AR={"Shop System":"نظام المحل","New":"جديد","All sales":"كل المبيعات","My sales":"مبيعاتي","Inventory":"المخزون","Settings":"الإعدادات","Report":"التقرير","Log out":"خروج","Admin":"مدير","Staff":"موظف","Sign in":"تسجيل الدخول","Email / username":"البريد / اسم المستخدم","Password":"كلمة المرور","Wrong email or password":"البريد أو كلمة المرور غير صحيحة",
+"Rent":"إيجار","Sale":"بيع","Maintenance":"صيانة","Date (choose a past day to add old transactions)":"التاريخ (اختر يوماً سابقاً لإضافة معاملات قديمة)","Vehicle":"المركبة","Duration":"المدة","How many? (Day × 3 = 3 days)":"كم العدد؟ (يوم × 3 = 3 أيام)","Product":"المنتج","Quantity":"الكمية","Bike / vehicle details":"تفاصيل الدراجة / المركبة","Service":"الخدمة","Parts / extra (EGP)":"قطع غيار / إضافات (جنيه)","Discount given (optional)":"الخصم (اختياري)","Customer name (optional)":"اسم العميل (اختياري)","Payment":"الدفع","Cash EGP":"نقداً جنيه","Visa":"فيزا","Cash USD":"نقداً دولار","Cash EUR":"نقداً يورو","Note (optional)":"ملاحظة (اختياري)","Total after discount":"الإجمالي بعد الخصم","Save transaction":"حفظ المعاملة","Choose all options":"اختر كل الخيارات",
+"From":"من","To":"إلى","Type":"النوع","Employee":"الموظف","All":"الكل","Today":"اليوم","This month":"هذا الشهر","Total collected":"إجمالي المحصّل","Discounts given":"الخصومات","By employee":"حسب الموظف","No sales":"لا توجد مبيعات","Export to Excel (CSV)":"تصدير إلى Excel (CSV)","Date":"التاريخ","Item":"الصنف","Qty":"العدد","Discount":"الخصم","Expected EGP":"المتوقع (جنيه)","Collected":"المحصّل","By":"بواسطة","Customer":"العميل","Sure?":"متأكد؟","Edit":"تعديل","(edited)":"(معدّل)",
+"Category":"الفئة","Stock":"المخزون","Price":"السعر","Status":"الحالة","Restock":"إضافة مخزون","OK":"جيد","LOW":"منخفض","OUT":"نفد","Add":"إضافة","Add a new product":"إضافة منتج جديد","Add product":"حفظ المنتج","Product name":"اسم المنتج","Total units in stock:":"إجمالي القطع في المخزون:","· to correct a count, type the right number in Stock":"· لتصحيح العدد اكتب الرقم الصحيح في خانة المخزون",
+"Exchange rates (EGP per 1)":"أسعار الصرف (جنيه لكل 1)","Rent prices (EGP)":"أسعار الإيجار (جنيه)","Maintenance services (EGP)":"خدمات الصيانة (جنيه)","Low stock at":"تنبيه المخزون المنخفض عند","New service name":"اسم خدمة جديدة","Half Hour":"نصف ساعة","One Hour":"ساعة","Two Hours":"ساعتان","Day":"يوم","Week":"أسبوع",
+"Edit transaction":"تعديل المعاملة","Discount currency":"عملة الخصم","Amount collected (in payment currency)":"المبلغ المحصّل (بعملة الدفع)","Customer name":"اسم العميل","Note":"ملاحظة","Save changes":"حفظ التعديلات","Cancel":"إلغاء","blank = as expected":"اتركه فارغاً = حسب المتوقع",
+"Month":"الشهر","Transactions":"المعاملات","Average per day":"المتوسط اليومي","Collected per day (EGP)":"المحصّل يومياً (جنيه)","By type":"حسب النوع","By payment method":"حسب طريقة الدفع","Top items":"أكثر الأصناف","No data":"لا توجد بيانات","Export this month (CSV)":"تصدير هذا الشهر (CSV)","e.g. red scooter":"مثال: سكوتر أحمر",
+"Expenses":"المصروفات","My expenses":"مصروفاتي","New expense":"مصروف جديد","Details (what was it for?)":"التفاصيل (على ماذا صُرف؟)","Details":"التفاصيل","Amount":"المبلغ","Save expense":"حفظ المصروف","Total expenses":"إجمالي المصروفات","Net":"الصافي","Expenses by category":"المصروفات حسب الفئة","Export expenses (CSV)":"تصدير المصروفات (CSV)","Enter details and amount":"أدخل التفاصيل والمبلغ","e.g. 20 litres petrol for scooter":"مثال: 20 لتر بنزين للسكوتر","Fuel":"وقود","Spare parts":"قطع غيار","Salaries":"رواتب","Shop rent":"إيجار المحل","Electricity / water":"كهرباء / مياه","Food / drinks":"طعام / مشروبات","Cleaning":"نظافة","Transport":"مواصلات","Other":"أخرى","Cash":"النقدية","Net balance":"الرصيد الصافي","= Net balance":"= الرصيد الصافي","Collected (Visa)":"المحصّل (فيزا)","of which cash in drawer":"منها نقد في الدرج","Net balance = collected − expenses + exchanged in − exchanged out, in each currency separately (no conversion).":"الرصيد الصافي = المحصّل − المصروفات + المستلم من الصرف − المدفوع في الصرف، لكل عملة على حدة (بدون تحويل).","Collected per day":"المحصّل يومياً","Currency for the charts":"عملة الرسوم البيانية","− Cost of items sold":"− تكلفة الأصناف المباعة","= Net profit":"= صافي الربح","no cost":"بدون تكلفة","Profit is calculated in each currency separately. Cost counts in the currency it was bought in.":"الربح محسوب لكل عملة على حدة، والتكلفة تُحسب بعملة الشراء.","Rentals by vehicle":"الإيجارات حسب المركبة","Sales by category":"المبيعات حسب الفئة","Maintenance by service":"الصيانة حسب الخدمة","Units sold":"الوحدات المباعة","Jobs":"عدد الأعمال","Rentals":"عدد الإيجارات","Rented now":"مؤجّر الآن","Close day":"إغلاق اليوم","Started":"بدأ","Due":"الموعد","Returned":"تم الإرجاع","Returned ✓":"تم الإرجاع ✓","No rentals out right now":"لا توجد إيجارات خارجة الآن","Opening":"الافتتاحي","Expected":"المتوقع","Counted":"المعدود","Difference":"الفرق","Save close":"حفظ الإغلاق","When":"الوقت","Closes":"الإغلاقات","Type the counted cash for every currency (0 if none)":"اكتب النقد المعدود لكل عملة (0 إن لم يوجد)","No previous close: counting from today 00:00. The admin types the opening cash.":"لا يوجد إغلاق سابق: العدّ من بداية اليوم. يكتب المدير الرصيد الافتتاحي.","Profit":"الربح","Cost":"التكلفة","Revenue":"الإيراد","Sold":"المباع","Margin":"الهامش","Profit by product":"الربح حسب المنتج","Revenue (collected)":"الإيرادات (المحصّل)","Cost of items sold":"تكلفة الأصناف المباعة","Net profit":"صافي الربح","Cost (optional)":"التكلفة (اختياري)","Expenses / Exchange":"المصروفات / الصرف","Exchange money":"صرف عملات","From currency":"من عملة","To currency":"إلى عملة","Amount given":"المبلغ المدفوع","Amount received":"المبلغ المستلم","Save exchange":"حفظ الصرف","Choose two different currencies and amounts":"اختر عملتين مختلفتين وأدخل المبالغ","Exchange":"الصرف","Rate":"السعر","Cash remaining":"النقدية المتبقية","Collected (cash)":"المحصّل (نقداً)","− Expenses":"− المصروفات","+ Exchanged in":"+ مستلم من الصرف","− Exchanged out":"− مدفوع في الصرف","= Cash remaining":"= النقدية المتبقية","Visa collected (not cash)":"محصّل بالفيزا (ليس نقداً)","Discounts given (information only)":"الخصومات الممنوحة (للعلم فقط)","Rentals, sales and maintenance":"الإيجار والبيع والصيانة","All time":"كل الفترة","Remaining = collected cash − expenses + exchanged in − exchanged out, for the dates above.":"المتبقي = النقد المحصّل − المصروفات + المستلم من الصرف − المدفوع في الصرف، عن الفترة أعلاه.","Money by currency":"الأموال حسب العملة","Currency":"العملة","Total (EGP value)":"الإجمالي (بقيمة الجنيه)","Discount (EGP)":"الخصم (جنيه)","EGP includes Visa payments.":"الجنيه يشمل مدفوعات الفيزا.","Summary by type":"الملخص حسب النوع","Count":"العدد","Total":"الإجمالي","Collected (EGP)":"المحصّل (جنيه)","Saved ✓":"تم الحفظ ✓","Added ✓":"تمت الإضافة ✓","Stock added ✓":"تمت إضافة المخزون ✓","Not enough stock":"المخزون غير كافٍ","Check the collected amount":"راجع المبلغ المحصّل","Cannot be empty":"لا يمكن أن يكون فارغاً","Enter 0 or more":"أدخل 0 أو أكثر","Enter name and price":"أدخل الاسم والسعر","Check quantity and date":"راجع الكمية والتاريخ","Discount is larger than the total":"الخصم أكبر من الإجمالي"};
+const RX=[[/^cash in drawer: (.+)$/,"النقد في الدرج: $1"],[/^Rented now \((\d+)\)$/,"مؤجّر الآن ($1)"],[/^(.+) overdue$/,"متأخر $1"],[/^(.+) left$/,"متبقي $1"],[/^⚠ (\d+) rental\(s\) overdue$/,"⚠ $1 إيجار متأخر"],[/^Since the last close: (.+)$/,"منذ آخر إغلاق: $1"],[/^(\d+) sold item\(s\) have no cost price, so profit is overstated\.$/,"$1 صنف مباع بدون سعر تكلفة، لذلك الربح مبالغ فيه."],[/^Exchanges \((\d+)\)$/,"عمليات الصرف ($1)"],[/^Expenses \((\d+)\)$/,"المصروفات ($1)"],[/^Transactions \((\d+)\)$/,"المعاملات ($1)"],[/^(.+) collected$/,(m,a)=>(AR[a]||a)+" محصّل"],[/^(Half Hour|One Hour|Two Hours|Day|Week) – (.+)$/,(m,a,b)=>AR[a]+" – "+b],
+[/^Amount you actually collected \((\w+)\)$/,"المبلغ الذي تم تحصيله فعلاً ($1)"],[/^Amount you actually collected$/,"المبلغ الذي تم تحصيله فعلاً"],[/^Difference from total: (.+)$/,"الفرق عن الإجمالي: $1"],
+[/^⚠ Recording for a past date: (.+)$/,"⚠ تسجيل ليوم سابق: $1"],[/^Stock set to (\d+) ✓$/,"تم تعيين المخزون إلى $1 ✓"],[/^Saved ✓ \((.+)\)$/,"تم الحفظ ✓ ($1)"]];
+function trs(s){const m=s.match(/^(\s*)([\s\S]*?)(\s*)$/);let c=m[2];if(!c)return s;let r=AR[c];
+ if(r==null)for(const x of RX)if(x[0].test(c)){r=c.replace(x[0],x[1]);break}
+ if(r==null)r=c;r=r.replace(/\bEGP\b/g,"جنيه").replace(/\bUSD\b/g,"دولار").replace(/\bEUR\b/g,"يورو");return m[1]+r+m[3]}
+const orig=new WeakMap();
+function tr(root){if(!root)return;const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n;
+ while(n=w.nextNode()){if(!orig.has(n))orig.set(n,n.nodeValue);n.nodeValue=lang==="ar"?trs(orig.get(n)):orig.get(n)}
+ root.querySelectorAll("[placeholder]").forEach(e=>{if(!e.dataset.ph)e.dataset.ph=e.placeholder;e.placeholder=lang==="ar"?trs(e.dataset.ph):e.dataset.ph})}
+function setLang(l){lang=l;try{localStorage.setItem("lang",l)}catch(e){}
+ document.documentElement.dir=l==="ar"?"rtl":"ltr";document.documentElement.lang=l;$("#lg").textContent=l==="ar"?"English":"العربية";
+ if(cfg)render();else tr(document.body)}
+document.documentElement.dir=lang==="ar"?"rtl":"ltr";document.documentElement.lang=lang;
+const er=e=>toast((e&&(e.message||e.code))||"Error");
+function stock(id){let s=0;for(const t of txs){if(t.pid!==id)continue;if(t.type==="sale")s-=t.qty;else if(t.type==="restock")s+=t.qty}const p=prods.find(x=>x.id===id);return s+(p?+p.opening||0:0)}
+
+
+let sb;
+/* Live data: full load once, then apply each change as it arrives (no 5000-row cap, deletes handled) */
+const LIVE=new Set();let liveCh=null,liveSeen=false,hidAt=0;
+const localEv=p=>LIVE.forEach(l=>l.apply(p));
+function liveStart(){if(liveCh)return;
+ liveCh=sb.channel("docs-live").on("postgres_changes",{event:"*",schema:"public",table:"docs"},p=>localEv(p))
+  .subscribe(st=>{if(st==="SUBSCRIBED"){if(liveSeen)LIVE.forEach(l=>l.run());liveSeen=true}});
+ document.addEventListener("visibilitychange",()=>{if(document.hidden)hidAt=Date.now();else if(hidAt&&Date.now()-hidAt>30000){hidAt=0;LIVE.forEach(l=>l.run())}})}
+function Q(col,id){const q={lim:Infinity};const api={
+ orderBy(){return api},limit(n){q.lim=n;return api},
+ async get(){let out=[],from=0;while(out.length<q.lim){const to=Math.min(from+999,q.lim-1);
+  let r=sb.from("docs").select("id,data").eq("col",col);if(id!==undefined)r=r.eq("id",id);
+  r=r.order("created",{ascending:true}).order("id",{ascending:true});const{data,error}=await r.range(from,to);if(error)throw error;
+  out=out.concat(data);if(data.length<to-from+1)break;from=to+1}return out},
+ onSnapshot(next,err){const L={rows:[],loading:false,buf:[],t:0,dead:false,ver:0};
+  const emit=()=>{if(L.dead)return;if(id!==undefined)next({data:()=>L.rows[0]?L.rows[0].data:undefined});else next({docs:L.rows.map(r=>({id:r.id,data:()=>r.data}))})};
+  const kick=()=>{clearTimeout(L.t);L.t=setTimeout(emit,120)};
+  const now=p=>{const n=p.new,o=p.old;
+   if(p.eventType==="DELETE"){const k=o&&o.id;if(!k||(o.col&&o.col!==col))return false;const i=L.rows.findIndex(r=>r.id===k);if(i<0)return false;L.rows.splice(i,1);return true}
+   if(!n||n.col!==col||(id!==undefined&&n.id!==id))return false;
+   const i=L.rows.findIndex(r=>r.id===n.id),r={id:n.id,data:n.data};if(i<0)L.rows.push(r);else L.rows[i]=r;return true};
+  L.apply=p=>{if(L.dead)return;if(L.loading){L.buf.push(p);return}if(now(p))kick()};
+  L.run=async()=>{const v=++L.ver;L.loading=true;
+   try{const r=await api.get();if(L.dead||v!==L.ver)return;L.rows=r;L.buf.forEach(now);L.buf=[];L.loading=false;emit()}
+   catch(e){if(v===L.ver){L.loading=false;L.buf.forEach(now);L.buf=[];kick()}err&&err(e)}};
+  LIVE.add(L);liveStart();L.run();
+  return()=>{L.dead=true;LIVE.delete(L)}},
+ async add(data){const nid=crypto.randomUUID();const{error}=await sb.from("docs").insert({col,id:nid,data});if(error)throw error;localEv({eventType:"INSERT",new:{col,id:nid,data}})},
+ async set(data){const{error}=await sb.from("docs").upsert({col,id,data},{onConflict:"col,id"});if(error)throw error;localEv({eventType:"UPDATE",new:{col,id,data}})},
+ async delete(){const{error}=await sb.from("docs").delete().eq("col",col).eq("id",id);if(error)throw error;localEv({eventType:"DELETE",old:{col,id}})}
+};return api}
+const DB={doc:p=>{const a=p.split("/");return Q(a[0],a[1])},collection:c=>Q(c)};
+function loginUI(){return new Promise(res=>{
+ $("#nav").innerHTML="";
+ $("#v").innerHTML='<div class="card"><h3 style="margin-top:0">Sign in</h3><label>Email / username</label><input id="em" type="email" autocomplete="username"><label>Password</label><input id="pw" type="password" autocomplete="current-password"><button id="go" class="on" style="margin-top:14px;width:100%;padding:13px">Sign in</button><p id="le" class="m"></p></div>';
+ const go=async()=>{$("#le").textContent="";const{data,error}=await sb.auth.signInWithPassword({email:$("#em").value.trim(),password:$("#pw").value});
+  if(error){$("#le").textContent="Wrong email or password";tr($("#le"));return}res(data.session)};
+ tr($("#v"));$("#go").onclick=go;$("#pw").addEventListener("keydown",e=>{if(e.key==="Enter")go()})})}
+async function bootSB(){
+ if(typeof SB_URL==="undefined"||SB_URL.startsWith("PASTE"))throw new Error("Open config.js and paste your Supabase URL and key");
+ sb=supabase.createClient(SB_URL,SB_KEY);
+ let{data:{session}}=await sb.auth.getSession();
+ while(!session)session=await loginUI();
+ const uid=session.user.id,{data:pf,error}=await sb.from("profiles").select("name,role").eq("id",uid).single();
+ if(error)throw new Error("Your profile was not found. Ask the admin.");
+ const USR={me:async()=>({id:uid,name:pf.name}),canEdit:async()=>pf.role==="admin",
+  profiles:async ids=>{const{data}=await sb.from("profiles").select("id,name").in("id",ids);const o={};(data||[]).forEach(x=>o[x.id]={name:x.name});return o}};
+ const DL={save:async({filename,data})=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:"text/csv;charset=utf-8"}));a.download=filename;document.body.appendChild(a);a.click();a.remove()}};
+ return[DB,USR,DL]}
+(async()=>{
+ try{
+  const r=await bootSB();db=r[0];usr=r[1];dl=r[2];
+  me=await usr.me();admin=await usr.canEdit();
+  $("#who").innerHTML=esc(me.name)+'<span class="chip">'+(admin?"Admin":"Staff")+'</span> <button data-a="out" id="lo">Log out</button>';
+  db.doc("config/main").onSnapshot(s=>{cfg=s.data()||null;refresh()},er);
+  db.collection("products").onSnapshot(s=>{prods=s.docs.map(x=>Object.assign({id:x.id},x.data()));refresh()},er);
+  const byTs=a=>a.sort((x,y)=>(y.ts||0)-(x.ts||0)),wid=s=>s.docs.map(x=>Object.assign({id:x.id},x.data()));
+  db.collection("ret").onSnapshot(s=>{rets=s.docs.map(x=>x.data());refresh()},er);
+  db.collection("cc").onSnapshot(s=>{ccs=byTs(wid(s));loadNames();refresh()},er);
+  db.collection("fx").onSnapshot(s=>{fxs=byTs(wid(s));loadNames();refresh()},er);
+  db.collection("exp").onSnapshot(s=>{exps=byTs(wid(s));loadNames();refresh()},er);
+  db.collection("tx").onSnapshot(s=>{txs=byTs(wid(s));loadNames();refresh()},er);
+  render();
+ }catch(e){$("#v").innerHTML='<p class="card">Could not start: '+esc(e.message)+"</p>"}
+})();
+function loadNames(){const ids=[...new Set(txs.concat(exps,fxs,ccs).map(t=>t.by))].filter(i=>i&&!names[i]);if(!ids.length)return;
+ usr.profiles(ids).then(p=>{for(const i in p)names[i]=p[i].name||"Staff";if(tab!=="new")render()}).catch(()=>{})}
+let stale=false;
+const typing=()=>{const a=document.activeElement;return!!(a&&a.closest&&a.closest("#v")&&a.matches("input,select,textarea"))};
+function refresh(){if(tab==="new"&&built){if(typing()){stale=true;upd();bannerUpd(navUpd())}else render()}else if((tab==="exp"||tab==="cc")&&((document.activeElement.dataset||{}).x!==undefined||(document.activeElement.dataset||{}).fx!==undefined||(document.activeElement.dataset||{}).cc!==undefined)){stale=true;return}else render()}
+
+function render(){render0();tr(document.body)}
+function render0(){
+ built=false;stale=false;
+ const od=navUpd();
+ if(!cfg){$("#v").innerHTML=`<p class="card">${admin?"No data yet. Prices and products have not been loaded.":"Waiting for the owner to set up prices and products…"}</p>`;return}
+ $("#v").innerHTML=tab==="new"?viewNew():tab==="tx"?viewTx():tab==="inv"?viewInv():tab==="exp"?viewExp():tab==="out"?viewOut():tab==="cc"?viewCC():tab==="cash"?viewCash():tab==="rep"?viewRep():viewSet();
+ bannerUpd(od);
+ if(tab==="cc")updCC();
+ if(tab==="new"){built=true;upd()}
+}
+
+/* ---------- New transaction ---------- */
+function calc(){
+ let unit,item="",extra=+F.extra||0;const disc=(+F.disc||0)*rate(F.dcur||"EGP");
+ if(F.type==="rent"){item=F.veh;unit=(cfg.rent[F.veh]||{})[F.dur];extra=0}
+ else if(F.type==="sale"){const p=prods.find(x=>x.id===F.pid);item=p?p.name:"";unit=p?pEGP(p):undefined;extra=0}
+ else{item=F.svc;unit=(cfg.services||{})[F.svc]}
+ const ok=typeof unit==="number"&&!!item&&F.qty>0;
+ return{item,unit,disc,extra,ok,total:ok?unit*F.qty+extra-disc:null}
+}
+function upd(){upd0();tr($("#v"))}
+function upd0(){
+ const c=calc(),el=$("#tot");if(!el)return;
+ const dn=$("#dn");if(dn)dn.textContent=F.date&&F.date!==today()?"⚠ Recording for a past date: "+F.date:"";
+ if(!c.ok){el.innerHTML='<span class="m">Choose all options</span>';$("#sv").disabled=true;return}
+ const cur=pcur(F.pay),ex=cur==="EGP"?c.total:c.total/rate(cur),pi=$("#paid");
+ el.innerHTML=`<span class="m">Total after discount</span><br><b>${n0(c.total)} EGP</b> `+(cur!=="EGP"?`<span class="m">= ${ex.toFixed(2)} ${cur}</span>`:"");
+ $("#plab").textContent="Amount you actually collected ("+cur+")";
+ if(!F.paidT)pi.value=cur==="EGP"?Math.round(ex):ex.toFixed(2);
+ const df=(F.paidT?+pi.value:ex)-ex;
+ $("#pd").textContent=Math.abs(df)>0.005?"Difference from total: "+(df>0?"+":"")+df.toFixed(cur==="EGP"?0:2)+" "+cur:"";
+ $("#sv").disabled=c.total<0;$("#q").textContent=F.qty;
+}
+function opts(a,cur){return a.map(o=>`<option value="${esc(o[0])}"${o[0]===cur?" selected":""}${o[2]?" disabled":""}>${esc(o[1])}</option>`).join("")}
+function durOpts(){const d=D.filter(x=>typeof(cfg.rent[F.veh]||{})[x]==="number");if(!d.includes(F.dur))F.dur=d[0];return opts(d.map(x=>[x,x+" – "+n0(cfg.rent[F.veh][x])+" EGP"]),F.dur)}
+function viewNew(){
+ const vehs=Object.keys(cfg.rent||{}),svcs=Object.keys(cfg.services||{});
+ if(!vehs.includes(F.veh))F.veh=vehs[0];if(!svcs.includes(F.svc))F.svc=svcs[0];
+ const ps=[...prods].sort((a,b)=>(a.cat+a.name).localeCompare(b.cat+b.name));
+ if(!ps.some(p=>p.id===F.pid&&stock(p.id)>0)){const f=ps.find(p=>stock(p.id)>0);F.pid=f?f.id:""}
+ let h=`<div class="row" style="margin-top:6px">${Object.keys(TN).map(k=>`<button data-a="type" data-v="${k}" class="${F.type===k?"on":""}">${TN[k]}</button>`).join("")}</div><div class="card">${admin?`<label style="margin-top:0">Date (choose a past day to add old transactions)</label><input type="date" data-f="date" value="${F.date||today()}" max="${today()}"><div id="dn" class="m"></div>`:""}`;
+ if(F.type==="rent")h+=`<label>Vehicle</label><select data-f="veh">${opts(vehs.map(v=>[v,v]),F.veh)}</select><label>Duration</label><select data-f="dur" id="dur">${durOpts()}</select><label>How many? (Day × 3 = 3 days)</label>`;
+ if(F.type==="sale")h+=`<label>Product</label><select data-f="pid">${opts(ps.map(p=>{const s=stock(p.id);return[p.id,`${p.name} (${s>0?s+" in stock":"out"}) – ${n0(pEGP(p))} EGP`,s<=0]}),F.pid)}</select><label>Quantity</label>`;
+ if(F.type==="maint")h+=`<label>Bike / vehicle details</label><input data-f="det" value="${esc(F.det||"")}" placeholder="e.g. red scooter"><label>Service</label><select data-f="svc">${opts(svcs.map(s=>[s,s+" – "+n0(cfg.services[s])+" EGP"]),F.svc)}</select><label>Quantity</label>`;
+ h+=`<div class="st"><button data-a="q" data-v="-1">−</button><b id="q">${F.qty}</b><button data-a="q" data-v="1">+</button></div>`;
+ if(F.type==="maint")h+=`<label>Parts / extra (EGP)</label><input data-f="extra" type="number" inputmode="numeric" min="0" value="${F.extra||""}">`;
+ h+=`<label>Discount given (optional)</label><div class="row"><input data-f="disc" type="number" inputmode="decimal" min="0" value="${F.disc||""}"><select data-f="dcur">${opts(["EGP","USD","EUR"].map(x=>[x,x]),F.dcur||"EGP")}</select></div>`;
+ h+=`<label>Customer name (optional)</label><input data-f="cust" value="${esc(F.cust||"")}"><label>Payment</label><div class="row">${P.map(p=>`<button data-a="pay" data-v="${p}" class="${F.pay===p?"on":""}">${p}</button>`).join("")}</div>
+ <label id="plab">Amount you actually collected</label><input data-f="paid" id="paid" type="number" inputmode="decimal" min="0" value="${F.paidT?esc(F.paid):""}"><div id="pd" class="m"></div>
+ <label>Note (optional)</label><input data-f="note" value="${esc(F.note||"")}"><div id="tot"></div><button id="sv" data-a="save">Save transaction</button></div>`;
+ return h;
+}
+async function save(){
+ const c=calc();if(!c.ok||c.total<0)return;
+ if(F.type==="sale"&&stock(F.pid)<F.qty)return toast("Not enough stock");
+ const cur=pcur(F.pay),ex=cur==="EGP"?c.total:c.total/rate(cur);
+ let paid=F.paidT?+F.paid:ex;if(isNaN(paid)||paid<0)return toast("Check the collected amount");paid=Math.round(paid*100)/100;
+ const dt=admin&&F.date?F.date:today(),ts=dt===today()?Date.now():new Date(dt+"T"+new Date().toTimeString().slice(0,8)).getTime();
+ const d={ts:ts,date:dt,by:me.id,type:F.type,item:c.item,qty:F.qty,unit:c.unit,disc:c.disc,discAmt:+F.disc||0,discCur:F.dcur||"EGP",extra:c.extra,total:c.total,pay:F.pay,cur:cur,collect:ex,paid:paid,paidE:paid*rate(cur),customer:F.cust||"",note:F.note||""};
+ if(F.type==="rent"){d.dur=F.dur;if(dt===today())d.live=true}if(F.type==="sale"){d.pid=F.pid;const pp=prods.find(x=>x.id===F.pid);if(pp&&pp.cost!=null){d.costN=pp.cost;d.costC=pp.cur||"EGP"}}if(F.type==="maint")d.det=F.det||"";
+ $("#sv").disabled=true;
+ try{await db.collection("tx").add(d);F={type:F.type,qty:1,pay:F.pay,veh:F.veh,svc:F.svc,date:F.date};toast("Saved ✓"+(dt!==today()?" ("+dt+")":""));render()}catch(e){er(e);$("#sv").disabled=false}
+}
+
+/* ---------- Transactions + dashboard ---------- */
+function rowsF(){return txs.filter(t=>t.type!=="restock"&&t.date>=flt.from&&t.date<=flt.to&&(admin||t.by===me.id)&&(!flt.type||t.type===flt.type)&&(!flt.by||t.by===flt.by))}
+function viewTx(){
+ const R=rowsF(),pc=nat,ids=[...new Set(txs.filter(t=>t.type!=="restock").map(t=>t.by))];
+ let h=editCard()+`<div class="card"><div class="row"><div><label>From</label><input type="date" data-l="from" value="${flt.from}"></div><div><label>To</label><input type="date" data-l="to" value="${flt.to}"></div>
+ <div><label>Type</label><select data-l="type">${opts([["","All"]].concat(Object.keys(TN).map(k=>[k,TN[k]])),flt.type)}</select></div>
+ ${admin?`<div><label>Employee</label><select data-l="by">${opts([["","All"]].concat(ids.map(i=>[i,nm(i)])),flt.by)}</select></div>`:""}</div></div>
+ <div class="row" style="margin-top:10px"><button data-a="rng" data-v="today">Today</button><button data-a="rng" data-v="month">This month</button></div>
+ <div class="grid" style="margin-top:10px">${CUR.map(c=>`<div class="k">${c} collected<b>${fmc2(c,R.filter(t=>t.cur===c).reduce((a,t)=>a+nat(t),0))}</b></div>`).join("")}<div class="k">Discounts given<b>${mstr(R,dis,dcu)}</b></div>
+ ${Object.keys(TN).map(k=>`<div class="k">${TN[k]}<b>${mcol(R.filter(t=>t.type===k))}</b></div>`).join("")}
+</div>`;
+ h+=typeTable(R);if(admin){const by=[...new Set(R.map(t=>t.by))];
+  h+=`<h3>By employee</h3><div class="card tw"><table>${by.map(i=>`<tr><td>${esc(nm(i))}</td><td><b>${mcol(R.filter(t=>t.by===i))}</b></td></tr>`).join("")||'<tr><td class="m">No sales</td></tr>'}</table></div>
+  <div style="margin-top:10px"><button data-a="exp"${dl?"":" disabled"}>Export to Excel (CSV)</button></div>`}
+ h+=`<h3>Transactions (${R.length})</h3><div class="card tw"><table><tr><th>Date</th><th>Type</th><th>Item</th><th>Qty</th><th>Discount</th><th>Expected EGP</th><th>Collected</th><th>Payment</th>${admin?"<th>By</th>":""}<th>Customer</th>${admin?"<th></th>":""}</tr>`+
+ R.map(t=>`<tr><td>${t.date.slice(5)} ${new Date(t.ts).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</td><td>${TN[t.type]||""}</td><td>${esc(t.item)}${t.dur?" ("+esc(t.dur)+")":""}${t.edited?' <span class="m">(edited)</span>':""}</td><td>${t.qty}</td><td>${t.disc?n0(t.discAmt!=null?t.discAmt:t.disc)+" "+(t.discCur||"EGP"):""}</td><td>${n0(t.total)}</td><td><b>${(t.cur==="EGP"?n0(pc(t)):pc(t).toFixed(2))+" "+t.cur}</b></td><td>${esc(t.pay)}</td>${admin?`<td>${esc(nm(t.by))}</td>`:""}<td>${esc(t.customer)}</td>${admin?`<td><button data-a="edit" data-v="${t.id}">Edit</button> <button data-a="del" data-v="${t.id}">${armed===t.id?"Sure?":"✕"}</button></td>`:""}</tr>`).join("")+"</table></div>";
+ return h;
+}
+async function exp(){
+ const R=rowsF(),q=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"';
+ const hd=["Date","Time","Type","Item","Duration","Qty","Unit EGP","Discount amount","Discount currency","Extra","Expected total EGP","Payment","Collected","Currency","Employee","Customer","Note"];
+ const csv=[hd.map(q).join(",")].concat(R.map(t=>[t.date,new Date(t.ts).toLocaleTimeString(),TN[t.type],t.item,t.dur||"",t.qty,t.unit,t.discAmt!=null?t.discAmt:t.disc,t.discCur||"EGP",t.extra,t.total,t.pay,(+nat(t)).toFixed(2),t.cur,nm(t.by),t.customer,t.note].map(q).join(","))).join("\n");
+ try{await dl.save({filename:`transactions_${flt.from}_${flt.to}.csv`,data:"\ufeff"+csv})}catch(e){er(e)}
+}
+
+/* ---------- Expenses ---------- */
+const EXC=["Fuel","Spare parts","Salaries","Shop rent","Electricity / water","Food / drinks","Cleaning","Transport","Other"];
+const exRows=()=>exps.filter(x=>x.date>=flt.from&&x.date<=flt.to&&(admin||x.by===me.id)&&(!flt.xc||x.cat===flt.xc)&&(!flt.by||x.by===flt.by));
+const exRange=()=>exps.filter(x=>x.date>=flt.from&&x.date<=flt.to).reduce((a,x)=>a+x.amtE,0);
+function viewExp(){
+ if(!X.date)X.date=today();if(!X.cat)X.cat=EXC[0];if(!X.cur)X.cur="EGP";
+ const R=exRows(),ids=[...new Set(exps.map(x=>x.by))],tot=mstr(R,x=>x.amt,x=>x.cur),bc={};R.forEach(x=>{(bc[x.cat]=bc[x.cat]||[]).push(x)});
+ let h=`<div class="card"><b>New expense</b>${admin?`<label>Date</label><input type="date" data-x="date" value="${X.date}" max="${today()}">`:""}
+ <label>Category</label><select data-x="cat">${opts(EXC.map(c=>[c,c]),X.cat)}</select>
+ <label>Details (what was it for?)</label><input data-x="desc" value="${esc(X.desc||"")}" placeholder="e.g. 20 litres petrol for scooter">
+ <label>Amount</label><div class="row"><input data-x="amt" type="number" inputmode="decimal" min="0" value="${esc(X.amt||"")}"><select data-x="cur">${opts(["EGP","USD","EUR"].map(c=>[c,c]),X.cur)}</select></div>
+ <button data-a="xsave" class="on" style="margin-top:14px;width:100%;padding:13px">Save expense</button></div>${fxCard()}
+ <div class="card"><div class="row"><div><label>From</label><input type="date" data-l="from" value="${flt.from}"></div><div><label>To</label><input type="date" data-l="to" value="${flt.to}"></div>
+ <div><label>Category</label><select data-l="xc">${opts([["","All"]].concat(EXC.map(c=>[c,c])),flt.xc||"")}</select></div>
+ ${admin?`<div><label>Employee</label><select data-l="by">${opts([["","All"]].concat(ids.map(i=>[i,nm(i)])),flt.by)}</select></div>`:""}</div>
+ <div class="row" style="margin-top:8px"><button data-a="rng" data-v="today">Today</button><button data-a="rng" data-v="month">This month</button></div></div>
+ <div class="grid" style="margin-top:10px"><div class="k">Total expenses<b>${tot}</b></div>${Object.entries(bc).sort((a,b)=>b[1].length-a[1].length).map(x=>`<div class="k">${esc(x[0])}<b>${mstr(x[1],y=>y.amt,y=>y.cur)}</b></div>`).join("")}</div>
+ <h3>Expenses (${R.length})</h3><div class="card tw"><table><tr><th>Date</th><th>Category</th><th>Details</th><th>Amount</th>${admin?"<th>By</th><th></th>":""}</tr>`+
+ R.map(x=>`<tr><td>${x.date.slice(5)}</td><td>${esc(x.cat)}</td><td style="white-space:normal;min-width:160px">${esc(x.desc)}</td><td><b>${x.cur==="EGP"?n0(x.amt):(+x.amt).toFixed(2)} ${x.cur}</b></td>${admin?`<td>${esc(nm(x.by))}</td><td><button data-a="xdel" data-v="${x.id}">${armed===x.id?"Sure?":"✕"}</button></td>`:""}</tr>`).join("")+"</table></div>";
+ const fa=(c,v)=>(c==="EGP"?n0(v):(+v).toFixed(2))+" "+c,fr=x=>{let a,m,b,n;if(x.from==="EGP"){a=x.to;m=+x.toAmt;b="EGP";n=+x.fromAmt}else{a=x.from;m=+x.fromAmt;b=x.to;n=+x.toAmt}return"1 "+a+" = "+(n/m).toFixed(2)+" "+b};
+ const FR=fxs.filter(x=>x.date>=flt.from&&x.date<=flt.to&&(admin||x.by===me.id)&&(!flt.by||x.by===flt.by));
+ h+=`<h3>Exchanges (${FR.length})</h3><div class="card tw"><table><tr><th>Date</th><th>Exchange</th><th>Rate</th>${admin?"<th>By</th><th></th>":""}</tr>`+FR.map(x=>`<tr><td>${x.date.slice(5)}</td><td><b>${fa(x.from,x.fromAmt)} → ${fa(x.to,x.toAmt)}</b></td><td>${fr(x)}</td>${admin?`<td>${esc(nm(x.by))}</td><td><button data-a="fxdel" data-v="${x.id}">${armed===x.id?"Sure?":"✕"}</button></td>`:""}</tr>`).join("")+"</table></div>";
+ if(admin)h+=`<div style="margin-top:10px"><button data-a="xexp"${dl?"":" disabled"}>Export expenses (CSV)</button></div>`;
+ return h;
+}
+async function xsave(){
+ const amt=+X.amt,desc=(X.desc||"").trim();if(!desc||!(amt>0))return toast("Enter details and amount");
+ const dt=admin&&X.date?X.date:today(),ts=dt===today()?Date.now():new Date(dt+"T"+new Date().toTimeString().slice(0,8)).getTime();
+ try{await db.collection("exp").add({ts:ts,date:dt,by:me.id,cat:X.cat,desc:desc,amt:amt,cur:X.cur,amtE:amt*rate(X.cur)});X={date:X.date,cat:X.cat,cur:X.cur};toast("Saved ✓");render()}catch(e){er(e)}
+}
+async function xexp(){
+ const q=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"',csv=[["Date","Category","Details","Amount","Currency","Employee"].map(q).join(",")].concat(exRows().map(x=>[x.date,x.cat,x.desc,x.amt,x.cur,nm(x.by)].map(q).join(","))).join("\n");
+ try{await dl.save({filename:`expenses_${flt.from}_${flt.to}.csv`,data:"\ufeff"+csv})}catch(e){er(e)}
+}
+
+const CUR=["EGP","USD","EUR"],nat=t=>t.paid!=null?t.paid:t.collect,fmc2=(c,v)=>c==="EGP"?n0(v):(+v).toFixed(2),dis=t=>t.discAmt!=null?t.discAmt:(t.disc||0),dcu=t=>t.discCur||"EGP";
+function mstr(L,af,cf){const o={};L.forEach(x=>{const c=cf(x);o[c]=(o[c]||0)+(+af(x)||0)});const a=CUR.filter(c=>Math.abs(o[c]||0)>0.004).map(c=>fmc2(c,o[c])+" "+c);return a.length?a.join(" + "):"0"}
+const mcol=L=>mstr(L,nat,t=>t.cur);
+function breakdowns(R){
+ const cat=t=>{const p=prods.find(x=>x.id===t.pid);return p?p.cat:"Other"};
+ const one=(type,title,label,cl,kf,cf)=>{const o={};R.filter(t=>t.type===type).forEach(t=>{const k=kf(t),x=o[k]=o[k]||{n:0,L:[]};x.n+=cf(t);x.L.push(t)});
+  const rows=Object.entries(o).sort((a,b)=>b[1].n-a[1].n);
+  return rows.length?`<h3>${title}</h3><div class="card tw"><table><tr><th>${label}</th><th>${cl}</th><th>Collected</th></tr>${rows.map(x=>`<tr><td>${esc(x[0])}</td><td><b>${x[1].n}</b></td><td>${mcol(x[1].L)}</td></tr>`).join("")}</table></div>`:""};
+ return one("rent","Rentals by vehicle","Vehicle","Rentals",t=>t.item,t=>1)+one("sale","Sales by category","Category","Units sold",cat,t=>t.qty)+one("maint","Maintenance by service","Service","Jobs",t=>t.item,t=>1)}
+function typeTable(R,noh){
+ const cs=(r,f)=>r.filter(f).reduce((a,t)=>a+nat(t),0),line=(l,r)=>[l,r.length,cs(r,t=>t.pay==="Cash EGP"),cs(r,t=>t.pay==="Visa"),cs(r,t=>t.cur==="USD"),cs(r,t=>t.cur==="EUR"),mstr(r,dis,dcu)];
+ const rows=Object.keys(TN).map(k=>line(TN[k],R.filter(t=>t.type===k))).concat([line("Total",R)]);
+ return`${noh?"":"<h3>Summary by type</h3>"}<div class="card tw"><table><tr><th>Type</th><th>Count</th><th>Cash EGP</th><th>Visa</th><th>Cash USD</th><th>Cash EUR</th><th>Discount</th></tr>${rows.map((r,i)=>{const b=x=>i===3?"<b>"+x+"</b>":x;return`<tr><td>${b(r[0])}</td><td>${b(r[1])}</td><td>${b(n0(r[2]))}</td><td>${b(n0(r[3]))}</td><td>${b(r[4].toFixed(2))}</td><td>${b(r[5].toFixed(2))}</td><td>${r[6]}</td></tr>`}).join("")}</table></div>`+breakdowns(R)}
+
+/* ---------- Cash (admin) ---------- */
+function viewCash(){
+ const inR=x=>x.date>=cr.from&&x.date<=cr.to,sm=(a,f)=>a.reduce((s,x)=>s+f(x),0);
+ const R=txs.filter(t=>t.type!=="restock"&&inR(t)),X2=exps.filter(inR),F2=fxs.filter(inR);
+ const cash=c=>sm(R.filter(t=>t.pay==="Cash "+c),nat),visa=c=>c==="EGP"?sm(R.filter(t=>t.pay==="Visa"),nat):0,ex=c=>sm(X2.filter(x=>x.cur===c),x=>+x.amt),fin=c=>sm(F2.filter(x=>x.to===c),x=>+x.toAmt),fout=c=>sm(F2.filter(x=>x.from===c),x=>+x.fromAmt);
+ const drawer=c=>cash(c)-ex(c)+fin(c)-fout(c),net=c=>drawer(c)+visa(c);
+ const row=(l,fn,b)=>`<tr><td>${b?"<b>"+l+"</b>":l}</td>${CUR.map(c=>`<td>${b?"<b>"+fmc2(c,fn(c))+"</b>":fmc2(c,fn(c))}</td>`).join("")}</tr>`;
+ return`<div class="card"><div class="row"><div><label>From</label><input type="date" data-c2="from" value="${cr.from}"></div><div><label>To</label><input type="date" data-c2="to" value="${cr.to}"></div></div>
+ <div class="row" style="margin-top:8px"><button data-a="cr" data-v="today">Today</button><button data-a="cr" data-v="month">This month</button><button data-a="cr" data-v="all">All time</button></div></div>
+ <h3>Net balance</h3><div class="grid">${CUR.map(c=>`<div class="k">${c}<b>${fmc2(c,net(c))}</b><span class="m">cash in drawer: ${fmc2(c,drawer(c))}</span></div>`).join("")}</div>
+ <div class="card tw" style="margin-top:10px"><table><tr><th></th>${CUR.map(c=>`<th>${c}</th>`).join("")}</tr>${row("Collected (cash)",cash)}${row("Collected (Visa)",visa)}${row("− Expenses",ex)}${row("+ Exchanged in",fin)}${row("− Exchanged out",fout)}${row("= Net balance",net,1)}${row("of which cash in drawer",drawer)}</table>
+ <p class="m">Net balance = collected − expenses + exchanged in − exchanged out, in each currency separately (no conversion).</p></div>
+ <div class="grid" style="margin-top:10px"><div class="k">Discounts given (information only)<b>${mstr(R,dis,dcu)}</b></div></div>
+ <h3>Rentals, sales and maintenance</h3>`+typeTable(R,1)}
+function fxCard(){
+ if(!FX.from)FX.from="USD";if(!FX.to)FX.to="EGP";
+ return`<div class="card"><b>Exchange money</b>${admin?`<label>Date</label><input type="date" data-fx="date" value="${FX.date||today()}" max="${today()}">`:""}
+ <div class="row"><div><label>From currency</label><select data-fx="from">${opts(CUR.map(c=>[c,c]),FX.from)}</select></div><div><label>Amount given</label><input data-fx="fa" type="number" inputmode="decimal" min="0" value="${esc(FX.fa||"")}"></div></div>
+ <div class="row"><div><label>To currency</label><select data-fx="to">${opts(CUR.map(c=>[c,c]),FX.to)}</select></div><div><label>Amount received</label><input data-fx="ta" type="number" inputmode="decimal" min="0" value="${esc(FX.ta||"")}"></div></div>
+ <button data-a="fxsave" class="on" style="margin-top:14px;width:100%;padding:13px">Save exchange</button></div>`}
+async function fxsave(){
+ const fa=+FX.fa,ta=+FX.ta;if(FX.from===FX.to||!(fa>0)||!(ta>0))return toast("Choose two different currencies and amounts");
+ const dt=admin&&FX.date?FX.date:today(),ts=dt===today()?Date.now():new Date(dt+"T"+new Date().toTimeString().slice(0,8)).getTime();
+ try{await db.collection("fx").add({ts:ts,date:dt,by:me.id,from:FX.from,fromAmt:fa,to:FX.to,toAmt:ta});FX={from:FX.from,to:FX.to,date:FX.date};toast("Saved ✓");render()}catch(e){er(e)}
+}
+
+/* ---------- Rented now ---------- */
+const DM={"Half Hour":30,"One Hour":60,"Two Hours":120,"Day":1440,"Week":10080};
+function outNow(){const done=new Set(rets.map(r=>r.tid));return txs.filter(t=>t.type==="rent"&&t.live&&!done.has(t.id)).map(t=>({t:t,due:t.ts+(DM[t.dur]||60)*t.qty*60000})).sort((a,b)=>a.due-b.due)}
+function navUpd(){
+ const OUT=outNow(),tabs=[["new","New"],["out","Rented now"+(OUT.length?" ("+OUT.length+")":"")],["tx",admin?"All sales":"My sales"],["inv","Inventory"],["exp","Expenses / Exchange"],["cc","Close day"]];if(admin)tabs.push(["cash","Cash"],["rep","Report"],["set","Settings"]);
+ $("#nav").innerHTML=tabs.map(t=>`<button data-a="tab" data-v="${t[0]}" class="${tab===t[0]?"on":""}">${t[1]}</button>`).join("");tr($("#nav"));
+ return OUT.filter(x=>x.due<Date.now()).length}
+function bannerUpd(od){const b=$("#odb");if(b)b.remove();
+ if(od&&tab!=="out"&&cfg){$("#v").insertAdjacentHTML("afterbegin",`<div id="odb" class="card" style="border-color:var(--bad)"><b style="color:var(--bad)">⚠ ${od} rental(s) overdue</b> <button data-a="tab" data-v="out" style="margin-inline-start:8px">View</button></div>`);tr($("#odb"))}}
+function viewOut(){
+ const L=outNow(),now=Date.now(),fm=ms=>{const m=Math.max(0,Math.round(ms/60000)),d=Math.floor(m/1440),h=Math.floor(m%1440/60);return(d?d+"d ":"")+(h?h+"h ":"")+(m%60)+"m"},tf=x=>new Date(x).toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
+ if(!L.length)return'<p class="card">No rentals out right now</p>';
+ return'<h3 style="margin-top:6px">Rented now</h3><div class="card tw"><table><tr><th>Vehicle</th><th>Customer</th><th>Started</th><th>Due</th><th>Status</th><th></th></tr>'+L.map(x=>{const o=x.due<now;return`<tr><td><b>${esc(x.t.item)}</b></td><td>${esc(x.t.customer||"")}</td><td>${tf(x.t.ts)}</td><td>${tf(x.due)}</td><td><b style="color:var(${o?"--bad":"--ok"})">${fm(Math.abs(x.due-now))} ${o?"overdue":"left"}</b></td><td><button data-a="ret" data-v="${x.t.id}">${armed===x.t.id?"Sure?":"Returned"}</button></td></tr>`}).join("")+"</table></div>"}
+
+/* ---------- Close day (cash count) ---------- */
+function ccLast(){return ccs.reduce((a,x)=>!a||x.ts>a.ts?x:a,null)}
+function ccExp(c){
+ const last=ccLast(),W=last?last.ts:new Date().setHours(0,0,0,0),o=CC.open&&CC.open[c]!==undefined&&CC.open[c]!==""?+CC.open[c]:(last&&last.cnt?+last.cnt[c]||0:0);
+ const col=txs.filter(t=>t.type!=="restock"&&t.ts>W&&t.pay==="Cash "+c).reduce((a,t)=>a+(t.paid!=null?t.paid:t.collect),0),ex=exps.filter(x=>x.ts>W&&x.cur===c).reduce((a,x)=>a+(+x.amt),0),
+  fi=fxs.filter(x=>x.ts>W&&x.to===c).reduce((a,x)=>a+(+x.toAmt),0),fo=fxs.filter(x=>x.ts>W&&x.from===c).reduce((a,x)=>a+(+x.fromAmt),0);
+ return{op:o,exp:o+col-ex+fi-fo}}
+const fmc=(c,v)=>c==="EGP"?n0(v):(+v).toFixed(2);
+function viewCC(){
+ const last=ccLast();CC.open=CC.open||{};CC.cnt=CC.cnt||{};
+ let h=`<div class="card"><b>Close day</b><p class="m">${last?"Since the last close: "+new Date(last.ts).toLocaleString():"No previous close: counting from today 00:00. The admin types the opening cash."}</p><div class="tw"><table><tr><th></th><th>Opening</th><th>Expected</th><th>Counted</th><th>Difference</th></tr>${CUR.map(c=>{const x=ccExp(c);return`<tr><td><b>${c}</b></td><td>${admin||!last?`<input class="md" type="number" inputmode="decimal" data-cc="o|${c}" value="${CC.open[c]!==undefined?esc(CC.open[c]):x.op}"${admin?"":" disabled"}>`:fmc(c,x.op)}</td><td id="cx-${c}"></td><td><input class="md" type="number" inputmode="decimal" data-cc="n|${c}" value="${esc(CC.cnt[c]===undefined?"":CC.cnt[c])}"></td><td id="cd-${c}"></td></tr>`}).join("")}</table></div>
+ <label>Note (optional)</label><input data-cc="note|" value="${esc(CC.note||"")}"><button data-a="ccsave" class="on" style="margin-top:14px;width:100%;padding:13px">Save close</button></div>`;
+ const H=ccs.filter(x=>admin||x.by===me.id).slice(0,30);
+ h+=`<h3>Closes</h3><div class="card tw"><table><tr><th>When</th>${admin?"<th>By</th>":""}${CUR.map(c=>`<th>${c}</th>`).join("")}</tr>`+H.map(x=>`<tr><td>${new Date(x.ts).toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})}</td>${admin?`<td>${esc(nm(x.by))}</td>`:""}${CUR.map(c=>{const d=(x.diff||{})[c]||0;return`<td>${fmc(c,(x.cnt||{})[c]||0)} <b style="color:var(${Math.abs(d)>0.005?"--bad":"--ok"})">(${d>0?"+":""}${fmc(c,d)})</b></td>`}).join("")}</tr>`).join("")+"</table></div>";
+ return h}
+function updCC(){CUR.forEach(c=>{const x=ccExp(c),e=$("#cx-"+c),d=$("#cd-"+c);if(!e)return;e.textContent=fmc(c,x.exp);const n=CC.cnt&&CC.cnt[c];
+ if(n===undefined||n===""){d.textContent="";return}const df=+n-x.exp;d.innerHTML=`<b style="color:var(${Math.abs(df)>0.005?"--bad":"--ok"})">${df>0?"+":""}${fmc(c,df)}</b>`})}
+async function ccsave(){
+ CC.open=CC.open||{};CC.cnt=CC.cnt||{};
+ if(CUR.some(c=>CC.cnt[c]===undefined||CC.cnt[c]===""||isNaN(+CC.cnt[c])))return toast("Type the counted cash for every currency (0 if none)");
+ const open={},exp={},cnt={},diff={};CUR.forEach(c=>{const x=ccExp(c);open[c]=x.op;exp[c]=Math.round(x.exp*100)/100;cnt[c]=+CC.cnt[c];diff[c]=Math.round((cnt[c]-exp[c])*100)/100});
+ try{await db.collection("cc").add({ts:Date.now(),date:today(),by:me.id,open:open,exp:exp,cnt:cnt,diff:diff,note:CC.note||""});CC={};toast("Saved ✓");render()}catch(e){er(e)}
+}
+
+/* ---------- Profit (inside Report) ---------- */
+function profitSec(R,X2){
+ const uc=t=>{if(t.costN!=null)return{n:t.costN,c:t.costC||"EGP"};if(t.costE!=null)return{n:t.costE,c:"EGP"};const p=prods.find(x=>x.id===t.pid);return p&&p.cost!=null?{n:p.cost,c:p.cur||"EGP"}:null};
+ const rev={},cst={},exc={},by={};let miss=0;CUR.forEach(c=>{rev[c]=0;cst[c]=0;exc[c]=0});
+ R.forEach(t=>{rev[t.cur]=(rev[t.cur]||0)+nat(t)});X2.forEach(x=>{exc[x.cur]=(exc[x.cur]||0)+(+x.amt)});
+ R.filter(t=>t.type==="sale").forEach(t=>{const u=uc(t),o=by[t.item]=by[t.item]||{q:0,rv:{},cs:{},m:0};o.q+=t.qty;o.rv[t.cur]=(o.rv[t.cur]||0)+nat(t);
+  if(u){cst[u.c]=(cst[u.c]||0)+u.n*t.qty;o.cs[u.c]=(o.cs[u.c]||0)+u.n*t.qty}else{miss++;o.m=1}});
+ const os=o=>{const a=CUR.filter(c=>Math.abs(o[c]||0)>0.004).map(c=>fmc2(c,o[c])+" "+c);return a.length?a.join(" + "):"0"};
+ const row=(l,f,b)=>`<tr><td>${b?"<b>"+l+"</b>":l}</td>${CUR.map(c=>`<td>${b?"<b>"+fmc2(c,f(c))+"</b>":fmc2(c,f(c))}</td>`).join("")}</tr>`;
+ const prof=x=>{if(x.m)return["no cost",""];const a=Object.keys(x.rv),b=Object.keys(x.cs);if(a.length!==1||b.length>1||(b.length&&b[0]!==a[0]))return["–",""];const c=a[0],r=x.rv[c],k=x.cs[c]||0;return[fmc2(c,r-k)+" "+c,r?Math.round((r-k)/r*100)+"%":""]};
+ return`<h3>Profit</h3><div class="card tw"><table><tr><th></th>${CUR.map(c=>`<th>${c}</th>`).join("")}</tr>${row("Revenue (collected)",c=>rev[c])}${row("− Cost of items sold",c=>cst[c])}${row("− Expenses",c=>exc[c])}${row("= Net profit",c=>rev[c]-cst[c]-exc[c],1)}</table>
+ <p class="m">Profit is calculated in each currency separately. Cost counts in the currency it was bought in.</p></div>
+ ${miss?`<p class="m">${miss} sold item(s) have no cost price, so profit is overstated.</p>`:""}
+ <h3>Profit by product</h3><div class="card tw"><table><tr><th>Product</th><th>Sold</th><th>Revenue</th><th>Cost</th><th>Profit</th><th>Margin</th></tr>${Object.entries(by).map(e=>{const x=e[1],p=prof(x);return`<tr><td>${esc(e[0])}</td><td>${x.q}</td><td>${os(x.rv)}</td><td>${os(x.cs)}</td><td><b>${p[0]}</b></td><td>${p[1]}</td></tr>`}).join("")||'<tr><td class="m">No data</td></tr>'}</table></div>`}
+
+/* ---------- Monthly report (admin) ---------- */
+function viewRep(){
+ const R=txs.filter(t=>t.type!=="restock"&&t.date.slice(0,7)===rm),EX=exps.filter(x=>x.date.slice(0,7)===rm),Rc=R.filter(t=>t.cur===rc);
+ const a=rm.split("-").map(Number),nd=new Date(a[0],a[1],0).getDate(),day=Array(nd).fill(0);Rc.forEach(t=>{day[+t.date.slice(8,10)-1]+=nat(t)});const mx=Math.max(1,...day);
+ const grp=(L,kf,af)=>{const o={};L.forEach(t=>{const k=kf(t);o[k]=(o[k]||0)+af(t)});return Object.entries(o).sort((x,y)=>y[1]-x[1])};
+ const hb=arr=>{const m=Math.max(1,...arr.map(x=>x[1]));return arr.length?arr.map(x=>`<div class="hb"><span>${esc(x[0])}</span><i style="width:${Math.max(2,x[1]/m*100)}%"></i><b>${fmc2(rc,x[1])}</b></div>`).join(""):'<p class="m">No data</p>'};
+ return`<div class="card"><div class="row"><div><label style="margin-top:0">Month</label><input type="month" data-r="m" value="${rm}"></div><div><label style="margin-top:0">Currency for the charts</label><select data-r="c">${opts(CUR.map(c=>[c,c]),rc)}</select></div></div></div>
+ <div class="grid" style="margin-top:10px">${CUR.map(c=>`<div class="k">${c} collected<b>${fmc2(c,R.filter(t=>t.cur===c).reduce((s,t)=>s+nat(t),0))}</b></div>`).join("")}<div class="k">Transactions<b>${R.length}</b></div></div>
+ ${typeTable(R)}${profitSec(R,EX)}
+ <h3>Collected per day</h3><div class="card"><div class="cols">${day.map((v,i)=>`<div title="${i+1}: ${fmc2(rc,v)}"><i style="height:${v/mx*100}%"></i><span>${i===0||(i+1)%5===0?i+1:""}</span></div>`).join("")}</div></div>
+ <h3>By type</h3><div class="card">${hb(grp(Rc,t=>TN[t.type],nat))}</div><h3>By payment method</h3><div class="card">${hb(grp(Rc,t=>t.pay,nat))}</div>
+ <h3>By employee</h3><div class="card">${hb(grp(Rc,t=>nm(t.by),nat))}</div><h3>Top items</h3><div class="card">${hb(grp(Rc,t=>t.item,nat).slice(0,8))}</div>
+ <h3>Expenses by category</h3><div class="card">${hb(grp(EX.filter(x=>x.cur===rc),x=>x.cat,x=>+x.amt))}</div>
+ <div style="margin-top:10px"><button data-a="rexp"${dl?"":" disabled"}>Export this month (CSV)</button></div>`}
+
+function editCard(){
+ if(!ed)return"";const t=txs.find(x=>x.id===ed);if(!t)return"";
+ const f=(k,l,ty)=>`<div><label>${l}</label><input data-e="${k}" type="${ty||"text"}" ${ty==="number"?'inputmode="decimal" ':""}value="${esc(E[k])}"></div>`;
+ return`<div class="card" style="border-color:var(--pri)"><b>Edit transaction</b> <span class="m">${esc(t.item)} · ${TN[t.type]}</span>
+ <div class="row">${f("date","Date","date")}${f("qty","Quantity","number")}</div>
+ <div class="row">${f("disc","Discount","number")}<div><label>Discount currency</label><select data-e="dcur">${opts(["EGP","USD","EUR"].map(x=>[x,x]),E.dcur)}</select></div></div>
+ ${t.type==="maint"?`<div class="row">${f("extra","Parts / extra (EGP)","number")}</div>`:""}
+ <div class="row"><div><label>Payment</label><select data-e="pay">${opts(P.map(x=>[x,x]),E.pay)}</select></div>${f("paid","Amount collected (in payment currency)","number")}</div>
+ <div class="row">${f("cust","Customer name")}${f("note","Note")}</div>
+ <div class="row" style="margin-top:12px"><button data-a="esave" class="on">Save changes</button><button data-a="ecancel">Cancel</button></div></div>`}
+async function eSave(){
+ const t=txs.find(x=>x.id===ed);if(!t)return;
+ const q=Math.round(+E.qty);if(!(q>0)||!E.date)return toast("Check quantity and date");
+ if(t.type==="sale"&&q>t.qty&&stock(t.pid)<q-t.qty)return toast("Not enough stock");
+ const same=(+E.disc||0)===(t.discAmt!=null?t.discAmt:(t.disc||0))&&E.dcur===(t.discCur||"EGP");
+ const disc=same?(t.disc||0):(+E.disc||0)*rate(E.dcur),extra=t.type==="maint"?(+E.extra||0):(t.extra||0);
+ const total=t.unit*q+extra-disc;if(total<0)return toast("Discount is larger than the total");
+ const cur=pcur(E.pay),rr=cur==="EGP"?1:(cur===t.cur&&t.paid>0&&t.paidE>0?t.paidE/t.paid:rate(cur)),ex=total/rr;
+ let paid=(E.paid===""||E.paid==null)?ex:+E.paid;if(isNaN(paid)||paid<0)return toast("Check the collected amount");paid=Math.round(paid*100)/100;
+ const d=Object.assign({},t);delete d.id;
+ Object.assign(d,{date:E.date,qty:q,disc:disc,discAmt:+E.disc||0,discCur:E.dcur,extra:extra,total:total,pay:E.pay,cur:cur,collect:ex,paid:paid,paidE:paid*rr,customer:E.cust||"",note:E.note||"",edited:{by:me.id,at:Date.now()}});
+ if(E.date!==t.date)d.ts=new Date(E.date+"T"+new Date(t.ts).toTimeString().slice(0,8)).getTime();
+ try{await db.doc("tx/"+t.id).set(d);ed=null;toast("Saved ✓");render()}catch(e){er(e)}
+}
+/* ---------- Inventory ---------- */
+function viewInv(){
+ const low=cfg.low==null?1:cfg.low,ps=[...prods].sort((a,b)=>(a.cat+a.name).localeCompare(b.cat+b.name));
+ let tot=0,h="";
+ const rows=ps.map(p=>{const s=stock(p.id);tot+=s;const st=s<=0?["OUT","bad"]:s<=low?["LOW","wrn"]:["OK","ok"];
+  return`<tr>${admin?`<td><input data-p="${p.id}|cat" value="${esc(p.cat)}" style="min-width:110px"></td><td><input data-p="${p.id}|name" value="${esc(p.name)}" style="min-width:240px"></td>`:`<td>${esc(p.cat)}</td><td>${esc(p.name)}</td>`}<td>${admin?`<input class="sm" type="number" inputmode="numeric" data-p="${p.id}|stock" value="${s}">`:`<b>${s}</b>`}</td><td>${admin?`<input class="md" type="number" inputmode="decimal" data-p="${p.id}|price" value="${p.price}"> ${esc(p.cur)}`:n0(pEGP(p))}</td>${admin?`<td><input class="md" type="number" inputmode="decimal" data-p="${p.id}|cost" value="${p.cost==null?"":p.cost}"> ${esc(p.cur)}</td>`:""}<td><span class="b ${st[1]}">${st[0]}</span></td>${admin?`<td><input class="sm" id="rs${p.id}" type="number" min="1" inputmode="numeric"> <button data-a="rs" data-v="${p.id}">Add</button></td>`:""}</tr>`}).join("");
+ h=`<div class="card tw"><div class="m">Total units in stock: <b>${tot}</b>${admin?" · to correct a count, type the right number in Stock":""}</div><table><tr><th>Category</th><th>Product</th><th>Stock</th><th>Price</th>${admin?"<th>Cost</th>":""}<th>Status</th>${admin?"<th>Restock</th>":""}</tr>${rows}</table></div>`;
+ if(admin)h+=`<h3>Add a new product</h3><div class="card"><div class="row"><input id="np-c" placeholder="Category"><input id="np-n" placeholder="Product name"></div><div class="row" style="margin-top:8px"><input id="np-q" type="number" inputmode="numeric" placeholder="Stock"><input id="np-p" type="number" inputmode="numeric" placeholder="Price"><input id="np-k" type="number" inputmode="decimal" placeholder="Cost (optional)"><select id="np-u"><option>EGP</option><option>USD</option><option>EUR</option></select></div><button data-a="addp" style="margin-top:8px">Add product</button></div>`;
+ return h;
+}
+async function editProd(t){
+ const a=t.dataset.p.split("|"),p=prods.find(x=>x.id===a[0]);if(!p)return;
+ let v=t.value.trim();
+ if(a[1]==="stock"){const n=Math.round(+v),cur=stock(a[0]);
+  if(v===""||isNaN(n)||n<0){toast("Enter 0 or more");t.value=cur;return}
+  const d=Object.assign({},p);delete d.id;d.opening=(+p.opening||0)+(n-cur);
+  try{await db.doc("products/"+a[0]).set(d);toast("Stock set to "+n+" ✓")}catch(e){er(e);t.value=cur}return}
+ if(a[1]==="cost"){const d=Object.assign({},p);delete d.id;if(v==="")delete d.cost;else{if(isNaN(+v)||+v<0){toast("Enter 0 or more");t.value=p.cost==null?"":p.cost;return}d.cost=+v}
+  try{await db.doc("products/"+a[0]).set(d);toast("Saved ✓")}catch(e){er(e)}return}
+ if(a[1]==="price")v=+v;
+ if(!v||(a[1]==="price"&&!(v>0))){toast("Cannot be empty");t.value=p[a[1]];return}
+ const d=Object.assign({},p);delete d.id;d[a[1]]=v;
+ try{await db.doc("products/"+a[0]).set(d);toast("Saved ✓")}catch(e){er(e);t.value=p[a[1]]}
+}
+async function addProd(){
+ const g=i=>$("#"+i).value.trim(),n=g("np-n"),p=+g("np-p");if(!n||!(p>0))return toast("Enter name and price");
+ try{await db.collection("products").add(Object.assign({cat:g("np-c")||"Other",name:n,opening:+g("np-q")||0,price:p,cur:$("#np-u").value},g("np-k")!==""?{cost:+g("np-k")}:{}));toast("Added ✓")}catch(e){er(e)}
+}
+
+/* ---------- Settings (admin) ---------- */
+function viewSet(){
+ const inp=(p,v)=>`<input class="sm" type="number" inputmode="decimal" data-c="${esc(p)}" value="${v==null?"":v}">`;
+ let h=`<h3>Exchange rates (EGP per 1)</h3><div class="card row"><div>USD ${inp("rates|USD",cfg.rates.USD)}</div><div>EUR ${inp("rates|EUR",cfg.rates.EUR)}</div><div>Low stock at ${inp("low",cfg.low==null?1:cfg.low)}</div></div>
+ <h3>Rent prices (EGP)</h3><div class="card tw"><table><tr><th>Vehicle</th>${D.map(d=>`<th>${d}</th>`).join("")}</tr>${Object.keys(cfg.rent||{}).map(v=>`<tr><td>${esc(v)}</td>${D.map(d=>`<td>${inp("rent|"+v+"|"+d,(cfg.rent[v]||{})[d])}</td>`).join("")}</tr>`).join("")}</table></div>
+ <h3>Maintenance services (EGP)</h3><div class="card tw"><table>${Object.keys(cfg.services||{}).map(s=>`<tr><td>${esc(s)}</td><td>${inp("services|"+s,cfg.services[s])}</td></tr>`).join("")}</table>
+ <div class="row" style="margin-top:8px"><input id="ns-n" placeholder="New service name"><input id="ns-p" type="number" inputmode="numeric" placeholder="Price"><button data-a="adds" style="flex:none">Add</button></div></div>`;
+ return h;
+}
+function setCfg(p,v){
+ const k=p.split("|");if(v===""&&(k[0]==="rates"||k[0]==="low"))return;
+ const c=JSON.parse(JSON.stringify(cfg));let o=c;for(let i=0;i<k.length-1;i++)o=o[k[i]]=o[k[i]]||{};
+ if(v===""||isNaN(+v))delete o[k[k.length-1]];else o[k[k.length-1]]=+v;
+ db.doc("config/main").set(c).then(()=>toast("Saved ✓")).catch(e=>{er(e);render()});
+}
+
+/* ---------- Events ---------- */
+setInterval(()=>{if(!cfg)return;if(stale&&!typing())render();else if(tab==="out")render();else if(tab==="new"&&built)bannerUpd(navUpd())},60000);
+document.addEventListener("click",e=>{
+ const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a,v=b.dataset.v;
+ if(a==="out"){sb.auth.signOut().then(()=>location.reload())}
+ else if(a==="lang")setLang(lang==="ar"?"en":"ar")
+ else if(a==="tab"){tab=v;armed="";render()}
+ else if(a==="type"){F={type:v,qty:1,pay:F.pay,veh:F.veh,svc:F.svc,pid:F.pid,date:F.date};render()}
+ else if(a==="rng"){const d=new Date(),m=String(d.getMonth()+1).padStart(2,"0");flt.from=v==="month"?d.getFullYear()+"-"+m+"-01":today();flt.to=today();render()}
+ else if(a==="pay"){F.pay=v;F.paidT=false;F.paid="";render()}
+ else if(a==="q"){F.qty=Math.max(1,F.qty+ +v);upd()}
+ else if(a==="save")save();
+ else if(a==="exp")exp();
+ else if(a==="addp")addProd();
+ else if(a==="adds"){const n=$("#ns-n").value.trim(),pv=$("#ns-p").value.trim(),p=+pv;if(!n||pv===""||!(p>=0))return toast("Enter name and price");const c=JSON.parse(JSON.stringify(cfg));c.services=c.services||{};c.services[n]=p;db.doc("config/main").set(c).then(()=>toast("Added ✓")).catch(er)}
+ else if(a==="rs"){const q=+$("#rs"+v).value;if(q>0)db.collection("tx").add({ts:Date.now(),date:today(),by:me.id,type:"restock",pid:v,qty:q}).then(()=>toast("Stock added ✓")).catch(er)}
+ else if(a==="edit"){const t=txs.find(x=>x.id===v);if(t){ed=v;E={date:t.date,qty:t.qty,disc:t.discAmt!=null?t.discAmt:(t.disc||0),dcur:t.discCur||"EGP",extra:t.extra||0,pay:t.pay,paid:+(+(t.paid!=null?t.paid:t.collect)).toFixed(2),cust:t.customer||"",note:t.note||""};render();window.scrollTo(0,0)}}
+ else if(a==="ret"){if(armed===v){armed="";db.collection("ret").add({tid:v,ts:Date.now(),date:today(),by:me.id}).then(()=>toast("Returned ✓")).catch(er)}else{armed=v;render()}}
+ else if(a==="ccsave")ccsave();
+ else if(a==="xsave")xsave();
+ else if(a==="fxsave")fxsave();
+ else if(a==="fxdel"){if(armed===v){armed="";db.doc("fx/"+v).delete().catch(er)}else{armed=v;render()}}
+ else if(a==="cr"){const d=new Date(),m=String(d.getMonth()+1).padStart(2,"0");if(v==="today"){cr.from=cr.to=today()}else if(v==="month"){cr.from=d.getFullYear()+"-"+m+"-01";cr.to=today()}else{cr.from="2000-01-01";cr.to=today()}render()}
+ else if(a==="xexp")xexp();
+ else if(a==="xdel"){if(armed===v){armed="";db.doc("exp/"+v).delete().catch(er)}else{armed=v;render()}}
+ else if(a==="ecancel"){ed=null;render()}
+ else if(a==="esave")eSave();
+ else if(a==="rexp"){const keep=Object.assign({},flt);Object.assign(flt,{from:rm+"-01",to:rm+"-31",type:"",by:""});exp().finally(()=>Object.assign(flt,keep))}
+ else if(a==="del"){if(armed===v){armed="";db.doc("tx/"+v).delete().catch(er)}else{armed=v;render()}}
+});
+document.addEventListener("input",e=>{const t=e.target,f=t.dataset.f;if(t.dataset.x!==undefined){X[t.dataset.x]=t.value;return}if(t.dataset.fx!==undefined){FX[t.dataset.fx]=t.value;return}if(t.dataset.cc!==undefined){const k=t.dataset.cc.split("|");if(k[0]==="o")CC.open[k[1]]=t.value;else if(k[0]==="n")CC.cnt[k[1]]=t.value;else CC.note=t.value;updCC();return}if(t.dataset.e){E[t.dataset.e]=t.value;if(t.dataset.e==="pay"){E.paid="";render()}return}if(!f)return;
+ F[f]=(f==="disc"||f==="extra")?(+t.value||0):t.value;if(f==="paid")F.paidT=t.value!=="";
+ if(f==="veh")$("#dur").innerHTML=durOpts();
+ if(f==="veh")F.dur=$("#dur").value;
+ upd();
+});
+document.addEventListener("change",e=>{const t=e.target;
+ if(t.dataset.l){flt[t.dataset.l]=t.value;render()}
+ else if(t.dataset.r){if(t.dataset.r==="c")rc=t.value;else rm=t.value||rm;render()}
+ else if(t.dataset.c2){cr[t.dataset.c2]=t.value;render()}
+ else if(t.dataset.c)setCfg(t.dataset.c,t.value);
+ else if(t.dataset.p)editProd(t);
+});
+</script></body></html>
