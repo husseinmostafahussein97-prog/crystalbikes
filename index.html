@@ -1,0 +1,846 @@
+<!doctype html>
+<html lang="en" data-skin="sea"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Shop System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f6f1;--fg:#1c261c;--card:#fff;--mut:#6a7468;--bd:#d8ddd2;--pri:#2e7d32;--pf:#fff;--bad:#c0392b;--wrn:#d98400;--ok:#2e7d32;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101510;--fg:#e8efe6;--card:#1a211a;--mut:#98a395;--bd:#2c372b;--pri:#66bb6a;--pf:#0c140c;--bad:#ef7b6f;--wrn:#f0b04a;--ok:#66bb6a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#101510;--fg:#e8efe6;--card:#1a211a;--mut:#98a395;--bd:#2c372b;--pri:#66bb6a;--pf:#0c140c;--bad:#ef7b6f;--wrn:#f0b04a;--ok:#66bb6a;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--pri);color:var(--pf)}
+header b{font-size:17px}
+.chip{border:1px solid currentColor;border-radius:99px;padding:1px 9px;font-size:12px;margin-inline-start:6px}
+nav{display:flex;gap:6px;padding:10px 12px;overflow-x:auto}
+nav button{flex:none}
+main{padding:0 12px 24px;max-width:900px;margin:0 auto}
+button,select,input,textarea{font:inherit;color:var(--fg)}
+button{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:9px 14px;cursor:pointer}
+button.on{background:var(--pri);color:var(--pf);border-color:var(--pri)}
+button:disabled{opacity:.45;cursor:not-allowed}
+select,input,textarea{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:9px 10px;width:100%}
+input.sm{width:64px;padding:6px}
+input.md{width:104px;padding:6px}
+label{display:block;font-size:13px;color:var(--mut);margin:12px 0 4px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-top:10px}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1}
+.st{display:flex;align-items:center;gap:14px}.st button{width:48px;font-size:20px}.st b{font-size:22px;min-width:30px;text-align:center}
+#tot{font-size:22px;margin:16px 0 4px}
+.m{color:var(--mut);font-size:13px;font-weight:400}
+#sv{width:100%;padding:14px;font-size:17px;background:var(--pri);color:var(--pf);border-color:var(--pri)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.k{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px}.k b{display:block;font-size:19px}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}th,td{padding:7px 8px;border-bottom:1px solid var(--bd);text-align:start;white-space:nowrap}th{color:var(--mut);font-weight:600}
+.b{border-radius:6px;padding:1px 8px;font-size:12px;font-weight:700;border:1px solid currentColor}.b.ok{color:var(--ok)}.b.wrn{color:var(--wrn)}.b.bad{color:var(--bad)}
+h3{margin:18px 0 4px}
+#lo{padding:3px 10px;margin-inline-start:8px;font-size:13px}
+.cols{display:flex;gap:2px;height:150px;margin-bottom:18px}.cols>div{flex:1;position:relative;display:flex;align-items:flex-end}.cols i{display:block;width:100%;background:var(--pri);border-radius:3px 3px 0 0}.cols span{position:absolute;bottom:-15px;left:0;right:0;text-align:center;font-size:9px;color:var(--mut)}
+.hb{display:grid;grid-template-columns:110px 1fr auto;gap:8px;align-items:center;margin:6px 0}.hb i{display:block;height:14px;background:var(--pri);border-radius:4px}.hb span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 18px;border-radius:99px;display:none;z-index:9}
+/* ===== Design 1: Red Sea ===== */
+:root[data-skin="sea"]{--bg:#e9f1f3;--fg:#0d2b36;--card:#fff;--mut:#5b7480;--bd:#cfdfe5;--pri:#0a6c88;--pf:#fff;--ok:#1c8a5a;--wrn:#b97700;--bad:#c2413a;color-scheme:light}
+@media(prefers-color-scheme:dark){:root[data-skin="sea"]:not([data-theme="light"]){--bg:#0a1b21;--fg:#e3f0f4;--card:#11262e;--mut:#8ea9b3;--bd:#21404b;--pri:#4fb3cf;--pf:#04161c;--ok:#5fcf98;--wrn:#f2b84b;--bad:#f07f76;color-scheme:dark}}
+:root[data-skin="sea"] body{font-family:"Readex Pro",system-ui,"Segoe UI",Tahoma,sans-serif}
+:root[data-skin="sea"] header{border-bottom:4px solid #f2b705}
+:root[data-skin="sea"] nav button{border-radius:99px;padding:8px 16px}
+:root[data-skin="sea"] .card{border-radius:18px}
+:root[data-skin="sea"] .k{border-radius:14px;border-inline-start:5px solid var(--pri)}
+:root[data-skin="sea"] .k b{font-size:21px;color:var(--pri)}
+:root[data-skin="sea"] button,:root[data-skin="sea"] select,:root[data-skin="sea"] input,:root[data-skin="sea"] textarea{border-radius:12px}
+:root[data-skin="sea"] #sv{border-radius:14px;font-weight:600}
+:root[data-skin="sea"] h3{color:var(--pri);font-weight:600}
+
+</style></head><body>
+<header><b>🛵 Shop System</b><span><button id="lg" data-a="lang" style="padding:3px 10px;font-size:13px">العربية</button> <span id="who"></span></span></header>
+<nav id="nav"></nav><main id="v"><p class="card">Loading…</p></main><p class="m" style="text-align:center;margin:8px 0 24px">Version 10</p>
+<div id="toast"></div>
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
+<script>
+const D=["Half Hour","One Hour","Two Hours","Day","Week"],P=["Cash EGP","Visa White","Visa Black","InstaPay","Cash USD","Cash EUR"],TN={rent:"Rent",sale:"Sale",maint:"Maintenance"},TNX=Object.assign({},TN,{pay:"Balance payment"});
+const $=s=>document.querySelector(s),today=()=>new Date().toLocaleDateString("en-CA");
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const n0=x=>Math.round(x).toLocaleString("en-US");
+let db,usr,dl,me,admin=false,cfg=null,prods=[],txs=[],names={},tab="new",built=false,armed="",
+F={type:"rent",qty:1,pay:"Cash EGP"},flt={from:today(),to:today(),type:"",by:""};
+const rate=c=>c==="USD"?cfg.rates.USD:c==="EUR"?cfg.rates.EUR:1;
+const isVisa=p=>/^Visa/.test(p||""),r2v=v=>Math.round(v*100)/100;
+const vfee=()=>cfg&&cfg.visaFee!=null&&!isNaN(+cfg.visaFee)?+cfg.visaFee:1.9;
+const n2=x=>(+x).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
+function visaBox(L){const f=vfee()/100,T=L.reduce((a,x)=>a+x[1],0);
+ return`<div class="grid"><div class="k">Total Visa<b>${n0(T)} EGP</b></div><div class="k">Visa fees<b style="color:var(--bad)">−${n2(T*f)} EGP</b></div><div class="k">Visa after fees<b>${n2(T-T*f)} EGP</b></div></div>
+ <div class="card tw" style="margin-top:10px"><table><tr><th></th><th>Collected</th><th>Fee (${vfee()}%)</th><th>After fee</th></tr>${L.map(x=>`<tr><td>${esc(x[0])}</td><td>${n0(x[1])}</td><td>−${n2(x[1]*f)}</td><td><b>${n2(x[1]-x[1]*f)}</b></td></tr>`).join("")}<tr><td><b>Total</b></td><td><b>${n0(T)}</b></td><td><b>−${n2(T*f)}</b></td><td><b>${n2(T-T*f)}</b></td></tr></table>
+ <p class="m">The Visa machines keep ${vfee()}% of every payment. Change it in Settings.</p></div>`}
+const pcur=p=>p==="Cash USD"?"USD":p==="Cash EUR"?"EUR":"EGP";
+const pEGP=p=>(p.cur==="USD"||p.cur==="EUR")?p.price*rate(p.cur):p.price;
+const nm=id=>names[id]||"Staff";
+const toast=t=>{const e=$("#toast");e.textContent=t;tr(e);e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",2600)};
+
+let pts=[],PT={},cms=[],M={},cce=null,CE={},SC={},rv=null,scs=[],plogs=[],ed=null,E={},X={},exps=[],fxs=[],rets=[],ccs=[],CC={},FX={},cr={from:today().slice(0,8)+"01",to:today()},rm=today().slice(0,7),rc="EGP",rf=today().slice(0,7),rt=today().slice(0,7),lang="en";try{lang=localStorage.getItem("lang")||"en"}catch(e){}
+const AR={"Shop System":"نظام المحل","New":"جديد","All sales":"كل المبيعات","My sales":"مبيعاتي","Inventory":"المخزون","Settings":"الإعدادات","Report":"التقرير","Log out":"خروج","Admin":"مدير","Staff":"موظف","Sign in":"تسجيل الدخول","Email / username":"البريد / اسم المستخدم","Password":"كلمة المرور","Wrong email or password":"البريد أو كلمة المرور غير صحيحة",
+"Rent":"إيجار","Sale":"بيع","Maintenance":"صيانة","Date (choose a past day to add old transactions)":"التاريخ (اختر يوماً سابقاً لإضافة معاملات قديمة)","Vehicle":"المركبة","Duration":"المدة","How many? (Day × 3 = 3 days)":"كم العدد؟ (يوم × 3 = 3 أيام)","Product":"المنتج","Quantity":"الكمية","Bike / vehicle details":"تفاصيل الدراجة / المركبة","Service":"الخدمة","Parts / extra (EGP)":"قطع غيار / إضافات (جنيه)","Discount given (optional)":"الخصم (اختياري)","Customer name (optional)":"اسم العميل (اختياري)","Payment":"الدفع","Cash EGP":"نقداً جنيه","Visa":"فيزا","Visa White":"فيزا بيضاء","Visa Black":"فيزا سوداء","Visa (machine not set)":"فيزا (بدون تحديد الماكينة)","Total Visa":"إجمالي الفيزا","Overview":"نظرة عامة","Customer paid with a bigger bill and got change in EGP":"العميل دفع بعملة أكبر وأخذ الباقي بالجنيه","Change given (EGP)":"الباقي المدفوع (جنيه)","Type how much the customer gave.":"اكتب المبلغ الذي أعطاه العميل.","(change)":"(باقي)","⬇ Download cash report":"⬇ تحميل تقرير النقدية","Total Visa (White + Black)":"إجمالي الفيزا (بيضاء + سوداء)","Start of day":"بداية اليوم","Day report":"تقرير اليوم","Download the whole day: rentals, sales, maintenance, money by payment, expenses and close day.":"حمّل اليوم كاملاً: الإيجارات والمبيعات والصيانة والأموال حسب طريقة الدفع والمصروفات وإغلاق اليوم.","⬇ Download day report":"⬇ تحميل تقرير اليوم","Summary":"الملخص","Rentals":"الإيجارات","Sales":"المبيعات","Balance payments":"دفعات متبقية","Money in":"الأموال الواردة","Exchanges":"عمليات الصرف","Cash drawer":"درج النقدية","= Cash at end of day":"= النقدية في نهاية اليوم","Gave":"دفع","Received":"استلم","Opened":"افتتاح","The day was not opened or closed in the app.":"لم يتم فتح أو إغلاق اليوم في التطبيق.","Customers who owe (from this day)":"عملاء عليهم مبالغ (من هذا اليوم)","Remaining now":"المتبقي الآن","Time":"الوقت","All employees":"كل الموظفين","Total EGP (cash + Visa + InstaPay)":"إجمالي الجنيه (نقدي + فيزا + إنستاباي)","Bike / vehicle":"الدراجة / المركبة","Price per unit in this sale (EGP)":"سعر الوحدة في هذه العملية (جنيه)","Use it":"استخدمه","Type what you paid for each product. Profit updates right away, also for sales already made.":"اكتب سعر شراء كل منتج. يتحدث الربح فوراً، حتى للمبيعات السابقة.","Cost (what you paid)":"التكلفة (سعر الشراء)","⚠ Exchange rates changed":"⚠ تغيّرت أسعار الصرف","Update":"تحديث","Keep mine":"احتفظ بسعري","Rates updated ✓":"تم تحديث الأسعار ✓","Safe rate":"السعر الآمن","Use safe rate":"استخدم السعر الآمن","⚠ above market":"⚠ أعلى من السوق","Safe rate = market rate − your safety margin. When a customer pays in dollars or euros, a lower rate means he pays a little more in USD/EUR, so you don’t lose when you change the money later. Your rate changes only when you tap “Use safe rate” or type it.":"السعر الآمن = سعر السوق − هامش الأمان. عندما يدفع العميل بالدولار أو اليورو، السعر الأقل يعني أنه يدفع أكثر قليلاً بالدولار/اليورو، فلا تخسر عند تغيير العملة لاحقاً. سعرك لا يتغير إلا إذا ضغطت “استخدم السعر الآمن” أو كتبته.","Safety margin %":"هامش الأمان %","Today’s market rate":"سعر السوق اليوم","Market":"السوق","Your rate":"سعرك","Use this":"استخدم هذا السعر","Same ✓":"نفس السعر ✓","Loading today’s market rate…":"جارٍ تحميل سعر السوق اليوم…","Could not load today’s market rate. Check the internet and open Settings again.":"تعذر تحميل سعر السوق. تحقق من الإنترنت وافتح الإعدادات مرة أخرى.","This is the international market rate, close to the official bank rate. Banks and exchange shops may buy and sell a little higher or lower. Your rate changes only when you tap “Use this” or type it.":"هذا سعر السوق العالمي، قريب من السعر الرسمي للبنك. قد تشتري البنوك وشركات الصرافة وتبيع بسعر أعلى أو أقل قليلاً. سعرك لا يتغير إلا إذا ضغطت “استخدم هذا السعر” أو كتبته بنفسك.","Editing transaction":"تعديل معاملة","Owed":"ديون العملاء","Balance payment":"دفعة متبقية","Pay remaining":"دفع المتبقي","Save payment":"حفظ الدفعة","Total owed to the shop":"إجمالي المستحق للمحل","Customers who owe":"عملاء عليهم مبالغ","Phone":"الهاتف","Paid":"المدفوع","Remaining":"المتبقي","Nobody owes money right now":"لا يوجد مبالغ مستحقة حالياً","Paid in full":"تم السداد بالكامل","Paid in full ✓":"تم السداد بالكامل ✓","More than the remaining amount":"أكثر من المبلغ المتبقي","Customer will pay the rest later":"العميل سيدفع الباقي لاحقاً","Customer phone":"هاتف العميل","Customer name is required.":"اسم العميل مطلوب.","Write the customer name":"اكتب اسم العميل","Owed by customers now":"المستحق على العملاء الآن","Cash in the drawer at the end of the month":"النقدية في الدرج في نهاية الشهر","What you really had after everything. The app continues from the latest month you fill in.":"المبلغ الفعلي بعد كل شيء. يكمل التطبيق من آخر شهر تملؤه.","Drawer EGP":"الدرج جنيه","Drawer USD":"الدرج دولار","Drawer EUR":"الدرج يورو","Drawer at end":"الدرج في النهاية","Total cash = what should be in the drawer at the end of these dates. Visa and InstaPay are not included.":"إجمالي النقدية = ما يجب أن يكون في الدرج في نهاية هذه الفترة. الفيزا وإنستاباي غير محسوبتين.","Starting balance – drawer when the system started":"الرصيد الافتتاحي – الدرج عند بدء النظام","Starting balance":"الرصيد الافتتاحي","+ Starting balance":"+ الرصيد الافتتاحي","Past totals (before the system)":"إجماليات سابقة (قبل النظام)","For months before you started using the app. These only count in this Report – not in Cash, Close day, stock or rentals. One entry per month.":"للشهور قبل استخدام التطبيق. تُحسب في هذا التقرير فقط – وليس في النقدية أو إغلاق اليوم أو المخزون أو الإيجارات. إدخال واحد لكل شهر.","Visa (EGP)":"فيزا (جنيه)","InstaPay (EGP)":"إنستاباي (جنيه)","Expenses (EGP)":"المصروفات (جنيه)","Save month":"حفظ الشهر","Choose a month":"اختر شهراً","Past totals":"إجماليات سابقة","From month":"من شهر","To month":"إلى شهر","Last 3 months":"آخر 3 شهور","This year":"هذا العام","Start of period":"بداية الفترة","= End of period":"= نهاية الفترة","Only cash in the drawer. Visa and InstaPay are not in the drawer.":"النقدية في الدرج فقط. الفيزا وإنستاباي ليست في الدرج.","Collected per month":"المحصّل شهرياً","Export (CSV)":"تصدير (CSV)","Collected = everything customers paid this month: cash, Visa and InstaPay.":"المحصّل = كل ما دفعه العملاء هذا الشهر: نقداً وفيزا وإنستاباي.","1. Money in – by payment method":"1. الأموال الواردة – حسب طريقة الدفع","Share":"النسبة","2. Cash drawer – in and out":"2. درج النقدية – الداخل والخارج","Start of month":"بداية الشهر","+ Cash sales":"+ مبيعات نقدية","= End of month":"= نهاية الشهر","Only cash. Visa and InstaPay go to the bank, not the drawer.":"نقدية فقط. الفيزا وإنستاباي تذهب للبنك وليس للدرج.","3. Money out – expenses":"3. الأموال الخارجة – المصروفات","4. Profit":"4. الربح","4. Sales by type":"4. المبيعات حسب النوع","Discounts":"الخصومات","By employee":"حسب الموظف","InstaPay":"إنستاباي","InstaPay (not cash)":"إنستاباي (ليست نقدية)","Cash taken out / added":"نقدية مسحوبة / مضافة","Use this when money leaves the drawer and is not a shop expense (owner takes cash, bank deposit), or when cash is put in.":"استخدم هذا عندما تخرج نقود من الدرج وليست مصروفاً للمحل (سحب المالك، إيداع في البنك)، أو عند إضافة نقود للدرج.","Taken out – owner took cash":"سحب – أخذها المالك","Taken out – bank deposit":"سحب – إيداع في البنك","Taken out – other":"سحب – أخرى","Added – owner put cash in":"إضافة – المالك وضع نقوداً","Added – correction (count was higher)":"إضافة – تصحيح (العدد الفعلي أكثر)","Taken out – correction (count was lower)":"سحب – تصحيح (العدد الفعلي أقل)","− Cash taken out":"− نقدية مسحوبة","+ Cash added":"+ نقدية مضافة","Total cash = what should be in the drawer from these dates. Visa and InstaPay are not included.":"إجمالي النقدية = ما يجب أن يكون في الدرج عن هذه الفترة. الفيزا وإنستاباي غير محسوبتين.","Save":"حفظ","Old Visa payments":"مدفوعات فيزا قديمة","→ Visa Black":"← فيزا سوداء","→ Visa White":"← فيزا بيضاء","Payments with “white” in the note go to Visa White. All others go to Visa Black.":"المدفوعات التي بها كلمة “white” أو “أبيض” في الملاحظة تذهب إلى الفيزا البيضاء، والباقي إلى الفيزا السوداء.","Move them now":"انقلها الآن","Edit opening":"تعديل الافتتاح","Edit close":"تعديل الإغلاق","Undo":"تراجع","Undone ✓":"تم التراجع ✓","Undo the close of this day first":"تراجع عن إغلاق هذا اليوم أولاً","Visa fees":"عمولة الفيزا","Visa after fees":"الفيزا بعد العمولة","After fee":"بعد العمولة","− Visa fees":"− عمولة الفيزا","Count stock":"جرد المخزون","Count each product on the shelf and type the number. Leave it empty if you did not count it.":"اعدد كل منتج على الرف واكتب العدد. اتركه فارغاً إذا لم تعدّه.","Save count":"حفظ الجرد","My counts":"عمليات الجرد الخاصة بي","Products counted":"المنتجات المعدودة","Type at least one count":"اكتب عدداً واحداً على الأقل","Stock counts by staff":"الجرد من الموظفين","Differences":"الفروقات","Review":"مراجعة","Applied ✓":"تم التطبيق ✓","Ignored":"تم التجاهل","Stock count":"الجرد","System":"النظام","Apply counts to stock":"تطبيق الجرد على المخزون","Ignore":"تجاهل","Close":"إغلاق","Product changes":"تغييرات المنتجات","Change":"التغيير","Staff permissions":"صلاحيات الموظفين","Staff can add products and edit names and prices":"يمكن للموظف إضافة منتجات وتعديل الأسماء والأسعار","Stock updated ✓":"تم تحديث المخزون ✓","Start of day":"بداية اليوم","End of day":"نهاية اليوم","Count the money in the drawer and type it below.":"عُدّ النقود في الدرج واكتبها بالأسفل.","Save opening":"حفظ الافتتاح","Day opened ✓":"تم فتح اليوم ✓","Saved ✓ – the admin will check it":"تم الحفظ ✓ – سيراجعه المدير","Opened":"افتتاح","Closed":"إغلاق","Mark checked":"تمت المراجعة","Checked ✓":"تمت المراجعة ✓","History":"السجل","Number of vehicles":"عدد المركبات","How long? (Day × 3 = 3 days)":"كم مدة؟ (يوم × 3 = 3 أيام)","Work done":"العمل الذي تم","Amount charged to client (EGP)":"المبلغ المطلوب من العميل (جنيه)","e.g. changed oil, fixed front brake":"مثال: تغيير زيت وإصلاح الفرامل الأمامية","Write the work done and the amount":"اكتب العمل الذي تم والمبلغ","Vehicles":"المركبات","Maintenance jobs":"أعمال الصيانة","Visa (not set)":"فيزا (غير محدد)","Visa (not cash)":"الفيزا (ليست نقدية)","Total cash":"إجمالي النقدية","= Total cash":"= إجمالي النقدية","Cash collected":"النقد المحصّل","Total cash = cash collected − expenses. Visa and InstaPay are not included.":"إجمالي النقدية = النقد المحصّل − المصروفات. الفيزا وإنستاباي غير محسوبتين.","Total cash = cash collected − expenses + exchanged in − exchanged out. Visa is not included.":"إجمالي النقدية = النقد المحصّل − المصروفات + المستلم من الصرف − المدفوع في الصرف. الفيزا وإنستاباي غير محسوبتين.","No expenses":"لا توجد مصروفات","Cash USD":"نقداً دولار","Cash EUR":"نقداً يورو","Note (optional)":"ملاحظة (اختياري)","Total after discount":"الإجمالي بعد الخصم","Save transaction":"حفظ المعاملة","Choose all options":"اختر كل الخيارات",
+"From":"من","To":"إلى","Type":"النوع","Employee":"الموظف","All":"الكل","Today":"اليوم","This month":"هذا الشهر","Total collected":"إجمالي المحصّل","Discounts given":"الخصومات","By employee":"حسب الموظف","No sales":"لا توجد مبيعات","Export to Excel (CSV)":"تصدير إلى Excel (CSV)","Date":"التاريخ","Item":"الصنف","Qty":"العدد","Discount":"الخصم","Expected EGP":"المتوقع (جنيه)","Collected":"المحصّل","By":"بواسطة","Customer":"العميل","Sure?":"متأكد؟","Edit":"تعديل","(edited)":"(معدّل)",
+"Category":"الفئة","Stock":"المخزون","Price":"السعر","Status":"الحالة","Restock":"إضافة مخزون","OK":"جيد","LOW":"منخفض","OUT":"نفد","Add":"إضافة","Add a new product":"إضافة منتج جديد","Add product":"حفظ المنتج","Product name":"اسم المنتج","Total units in stock:":"إجمالي القطع في المخزون:","· to correct a count, type the right number in Stock":"· لتصحيح العدد اكتب الرقم الصحيح في خانة المخزون",
+"Exchange rates (EGP per 1)":"أسعار الصرف (جنيه لكل 1)","Rent prices (EGP)":"أسعار الإيجار (جنيه)","Maintenance services (EGP)":"خدمات الصيانة (جنيه)","Low stock at":"تنبيه المخزون المنخفض عند","New service name":"اسم خدمة جديدة","Half Hour":"نصف ساعة","One Hour":"ساعة","Two Hours":"ساعتان","Day":"يوم","Week":"أسبوع",
+"Edit transaction":"تعديل المعاملة","Discount currency":"عملة الخصم","Amount collected (in payment currency)":"المبلغ المحصّل (بعملة الدفع)","Customer name":"اسم العميل","Note":"ملاحظة","Save changes":"حفظ التعديلات","Cancel":"إلغاء","blank = as expected":"اتركه فارغاً = حسب المتوقع",
+"Month":"الشهر","Transactions":"المعاملات","Average per day":"المتوسط اليومي","Collected per day (EGP)":"المحصّل يومياً (جنيه)","By type":"حسب النوع","By payment method":"حسب طريقة الدفع","Top items":"أكثر الأصناف","No data":"لا توجد بيانات","Export this month (CSV)":"تصدير هذا الشهر (CSV)","e.g. red scooter":"مثال: سكوتر أحمر",
+"Expenses":"المصروفات","My expenses":"مصروفاتي","New expense":"مصروف جديد","Details (what was it for?)":"التفاصيل (على ماذا صُرف؟)","Details":"التفاصيل","Amount":"المبلغ","Save expense":"حفظ المصروف","Total expenses":"إجمالي المصروفات","Net":"الصافي","Expenses by category":"المصروفات حسب الفئة","Export expenses (CSV)":"تصدير المصروفات (CSV)","Enter details and amount":"أدخل التفاصيل والمبلغ","e.g. 20 litres petrol for scooter":"مثال: 20 لتر بنزين للسكوتر","Fuel":"وقود","Spare parts":"قطع غيار","Salaries":"رواتب","Shop rent":"إيجار المحل","Electricity / water":"كهرباء / مياه","Food / drinks":"طعام / مشروبات","Cleaning":"نظافة","Transport":"مواصلات","Other":"أخرى","Cash":"النقدية","Net balance":"الرصيد الصافي","= Net balance":"= الرصيد الصافي","Collected (Visa)":"المحصّل (فيزا)","of which cash in drawer":"منها نقد في الدرج","Net balance = collected − expenses + exchanged in − exchanged out, in each currency separately (no conversion).":"الرصيد الصافي = المحصّل − المصروفات + المستلم من الصرف − المدفوع في الصرف، لكل عملة على حدة (بدون تحويل).","Collected per day":"المحصّل يومياً","Currency for the charts":"عملة الرسوم البيانية","− Cost of items sold":"− تكلفة الأصناف المباعة","= Net profit":"= صافي الربح","no cost":"بدون تكلفة","Profit is calculated in each currency separately. Cost counts in the currency it was bought in.":"الربح محسوب لكل عملة على حدة، والتكلفة تُحسب بعملة الشراء.","Rentals by vehicle":"الإيجارات حسب المركبة","Sales by category":"المبيعات حسب الفئة","Maintenance by service":"الصيانة حسب الخدمة","Units sold":"الوحدات المباعة","Jobs":"عدد الأعمال","Rentals":"عدد الإيجارات","Rented now":"مؤجّر الآن","Close day":"إغلاق اليوم","Started":"بدأ","Due":"الموعد","Returned":"تم الإرجاع","Returned ✓":"تم الإرجاع ✓","No rentals out right now":"لا توجد إيجارات خارجة الآن","Opening":"الافتتاحي","Expected":"المتوقع","Counted":"المعدود","Difference":"الفرق","Save close":"حفظ الإغلاق","When":"الوقت","Closes":"الإغلاقات","Type the counted cash for every currency (0 if none)":"اكتب النقد المعدود لكل عملة (0 إن لم يوجد)","No previous close: counting from today 00:00. The admin types the opening cash.":"لا يوجد إغلاق سابق: العدّ من بداية اليوم. يكتب المدير الرصيد الافتتاحي.","Profit":"الربح","Cost":"التكلفة","Revenue":"الإيراد","Sold":"المباع","Margin":"الهامش","Profit by product":"الربح حسب المنتج","Revenue (collected)":"الإيرادات (المحصّل)","Cost of items sold":"تكلفة الأصناف المباعة","Net profit":"صافي الربح","Cost (optional)":"التكلفة (اختياري)","Expenses / Exchange":"المصروفات / الصرف","Exchange money":"صرف عملات","From currency":"من عملة","To currency":"إلى عملة","Amount given":"المبلغ المدفوع","Amount received":"المبلغ المستلم","Save exchange":"حفظ الصرف","Choose two different currencies and amounts":"اختر عملتين مختلفتين وأدخل المبالغ","Exchange":"الصرف","Rate":"السعر","Cash remaining":"النقدية المتبقية","Collected (cash)":"المحصّل (نقداً)","− Expenses":"− المصروفات","+ Exchanged in":"+ مستلم من الصرف","− Exchanged out":"− مدفوع في الصرف","= Cash remaining":"= النقدية المتبقية","Visa collected (not cash)":"محصّل بالفيزا (ليس نقداً)","Discounts given (information only)":"الخصومات الممنوحة (للعلم فقط)","Rentals, sales and maintenance":"الإيجار والبيع والصيانة","All time":"كل الفترة","Remaining = collected cash − expenses + exchanged in − exchanged out, for the dates above.":"المتبقي = النقد المحصّل − المصروفات + المستلم من الصرف − المدفوع في الصرف، عن الفترة أعلاه.","Money by currency":"الأموال حسب العملة","Currency":"العملة","Total (EGP value)":"الإجمالي (بقيمة الجنيه)","Discount (EGP)":"الخصم (جنيه)","EGP includes Visa payments.":"الجنيه يشمل مدفوعات الفيزا.","Summary by type":"الملخص حسب النوع","Count":"العدد","Total":"الإجمالي","Collected (EGP)":"المحصّل (جنيه)","Saved ✓":"تم الحفظ ✓","Added ✓":"تمت الإضافة ✓","Stock added ✓":"تمت إضافة المخزون ✓","Not enough stock":"المخزون غير كافٍ","Check the collected amount":"راجع المبلغ المحصّل","Cannot be empty":"لا يمكن أن يكون فارغاً","Enter 0 or more":"أدخل 0 أو أكثر","Enter name and price":"أدخل الاسم والسعر","Check quantity and date":"راجع الكمية والتاريخ","Discount is larger than the total":"الخصم أكبر من الإجمالي"};
+const RX=[[/^cash in drawer: (.+)$/,"النقد في الدرج: $1"],[/^Rented now \((\d+)\)$/,"مؤجّر الآن ($1)"],[/^(.+) overdue$/,"متأخر $1"],[/^(.+) left$/,"متبقي $1"],[/^⚠ (\d+) rental\(s\) overdue$/,"⚠ $1 إيجار متأخر"],[/^Since the last close: (.+)$/,"منذ آخر إغلاق: $1"],[/^(\d+) sold item\(s\) have no cost price, so profit is overstated\.$/,"$1 صنف مباع بدون سعر تكلفة، لذلك الربح مبالغ فيه."],[/^Exchanges \((\d+)\)$/,"عمليات الصرف ($1)"],[/^Cash taken out \/ added \((\d+)\)$/,"نقدية مسحوبة / مضافة ($1)"],[/^Expenses \((\d+)\)$/,"المصروفات ($1)"],[/^Transactions \((\d+)\)$/,"المعاملات ($1)"],[/^(.+) collected$/,(m,a)=>(AR[a]||a)+" محصّل"],[/^(Half Hour|One Hour|Two Hours|Day|Week) – (.+)$/,(m,a,b)=>AR[a]+" – "+b],
+[/^Amount you actually collected \((\w+)\)$/,"المبلغ الذي تم تحصيله فعلاً ($1)"],[/^Amount you actually collected$/,"المبلغ الذي تم تحصيله فعلاً"],[/^Difference from total: (.+)$/,"الفرق عن الإجمالي: $1"],
+[/^⚠ Recording for a past date: (.+)$/,"⚠ تسجيل ليوم سابق: $1"],[/^Fee \((.+)%\)$/,"العمولة ($1%)"],[/^Visa fee %$/,"عمولة الفيزا %"],[/^The Visa machines keep (.+)% of every payment\. Change it in Settings\.$/,"ماكينات الفيزا تخصم $1% من كل عملية. يمكن تغييرها من الإعدادات."],[/^(\d+) old payment\(s\) were saved as just “Visa”, without the machine\.$/,"$1 عملية قديمة محفوظة كـ “فيزا” فقط بدون تحديد الماكينة."],[/^(\d+) payment\(s\)$/,"$1 عملية"],[/^(.+)% vs previous period$/,"$1% مقارنة بالفترة السابقة"],[/^Visa fees \((.+)%\): −(.+) EGP → Visa reaching the bank: (.+) EGP$/,"عمولة الفيزا ($1%): −$2 جنيه ← الفيزا الواصلة للبنك: $3 جنيه"],[/^5\. Charts \((\w+)\)$/,"5. رسوم بيانية ($1)"],[/^Owed \((\d+)\)$/,"ديون العملاء ($1)"],[/^Remaining: (.+)$/,"المتبقي: $1"],[/^(\d+) customer\(s\)$/,"$1 عميل"],[/^Customer will pay the rest later \(remaining: (.+)\)$/,"العميل سيدفع الباقي لاحقاً (المتبقي: $1)"],[/^Amount \((\w+)\)$/,"المبلغ ($1)"],[/^\(updated (.+)\)$/,"(آخر تحديث $1)"],[/^\(market ([+−-]?.+)\)$/,"(السوق $1)"],[/^1 (USD|EUR)$/,"1 $1"],[/^Safe rate today: 1 USD = (.+) · 1 EUR = (.+) EGP \(yours: (.+) · (.+)\)$/,"السعر الآمن اليوم: 1 دولار = $1 · 1 يورو = $2 جنيه (سعرك: $3 · $4)"],[/^⚠ (\d+) sold item\(s\) have no cost price, so profit is too high\.$/,"⚠ $1 صنف مباع بدون سعر تكلفة، لذلك الربح أعلى من الحقيقي."],[/^Current price list: (.+)$/,"السعر الحالي في القائمة: $1"],[/^Only where collected ≠ expected \((\d+)\)$/,"فقط حيث المحصّل ≠ المتوقع ($1)"],[/^owes (.+)$/,"عليه $1"],[/^Maintenance jobs \((\d+)\)$/,"أعمال الصيانة ($1)"],[/^Day report – (.+)$/,"تقرير اليوم – $1"],[/^(\d+) vehicle\(s\)$/,"$1 مركبة"],[/^(\d+) item\(s\)$/,"$1 قطعة"],[/^All transactions \((\d+)\)$/,"كل المعاملات ($1)"],[/^Total (USD|EUR)$/,"إجمالي $1"],[/^Made (.+)$/,"أُنشئ $1"],[/^Cash report – (.+)$/,"تقرير النقدية – $1"],[/^Customer gave \((\w+)\)$/,"العميل أعطى ($1)"],[/^Rental\/sale: (.+) · change should be about (.+) EGP \(rate (.+)\)(.*)$/,(m,a,b,c,d)=>"المطلوب: "+a+" · الباقي حوالي "+b+" جنيه (السعر "+c+")"+d.replace(" · difference "," · فرق ").replace(" EGP"," جنيه")],[/^gave (.+) · change (.+) EGP$/,"أعطى $1 · الباقي $2 جنيه"],[/^Closing of (.+)$/,"إغلاق $1"],[/^Includes past totals for: (.+)$/,"يشمل إجماليات سابقة لـ: $1"],[/^Past totals – (.+)$/,(m,a)=>"إجماليات سابقة – "+(AR[a]||a)],[/^Added by (.+)$/,"أضافه $1"],[/^Edited by (.+) – (.+)$/,"عدّله $1 – $2"],[/^⚠ (\d+) stock count\(s\) to review$/,"⚠ $1 جرد بحاجة للمراجعة"],[/^Added \(stock (.+), price (.+)\)$/,"أضيف (المخزون $1، السعر $2)"],[/^(Category|Product|Price|Cost|Stock): (.+)$/,(m,a,b)=>AR[a]+": "+b],[/^Day opened: (.+) by (.+)$/,"تم فتح اليوم: $1 بواسطة $2"],[/^Last close: (.+)$/,"آخر إغلاق: $1"],[/^Expected: (.+)$/,"المتوقع: $1"],[/^⚠ (\d+) cash count\(s\) with a difference$/,"⚠ $1 عدّ نقدي به فرق"],[/^Stock set to (\d+) ✓$/,"تم تعيين المخزون إلى $1 ✓"],[/^Saved ✓ \((.+)\)$/,"تم الحفظ ✓ ($1)"]];
+function trs(s){const m=s.match(/^(\s*)([\s\S]*?)(\s*)$/);let c=m[2];if(!c)return s;let r=AR[c];
+ if(r==null)for(const x of RX)if(x[0].test(c)){r=c.replace(x[0],x[1]);break}
+ if(r==null)r=c;r=r.replace(/\bEGP\b/g,"جنيه").replace(/\bUSD\b/g,"دولار").replace(/\bEUR\b/g,"يورو");return m[1]+r+m[3]}
+const orig=new WeakMap();
+function tr(root){if(!root)return;const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n;
+ while(n=w.nextNode()){if(!orig.has(n))orig.set(n,n.nodeValue);n.nodeValue=lang==="ar"?trs(orig.get(n)):orig.get(n)}
+ root.querySelectorAll("[placeholder]").forEach(e=>{if(!e.dataset.ph)e.dataset.ph=e.placeholder;e.placeholder=lang==="ar"?trs(e.dataset.ph):e.dataset.ph})}
+function setLang(l){lang=l;try{localStorage.setItem("lang",l)}catch(e){}
+ document.documentElement.dir=l==="ar"?"rtl":"ltr";document.documentElement.lang=l;$("#lg").textContent=l==="ar"?"English":"العربية";
+ if(cfg)render();else tr(document.body)}
+document.documentElement.dir=lang==="ar"?"rtl":"ltr";document.documentElement.lang=lang;
+const er=e=>toast((e&&(e.message||e.code))||"Error");
+function stock(id){let s=0;for(const t of txs){if(t.pid!==id)continue;if(t.type==="sale")s-=t.qty;else if(t.type==="restock")s+=t.qty}const p=prods.find(x=>x.id===id);return s+(p?+p.opening||0:0)}
+
+
+let sb;
+/* Live data: full load once, then apply each change as it arrives (no 5000-row cap, deletes handled) */
+const LIVE=new Set();let liveCh=null,liveSeen=false,hidAt=0;
+const localEv=p=>LIVE.forEach(l=>l.apply(p));
+function liveStart(){if(liveCh)return;
+ liveCh=sb.channel("docs-live").on("postgres_changes",{event:"*",schema:"public",table:"docs"},p=>localEv(p))
+  .subscribe(st=>{if(st==="SUBSCRIBED"){if(liveSeen)LIVE.forEach(l=>l.run());liveSeen=true}});
+ document.addEventListener("visibilitychange",()=>{if(document.hidden)hidAt=Date.now();else if(hidAt&&Date.now()-hidAt>30000){hidAt=0;LIVE.forEach(l=>l.run())}})}
+function Q(col,id){const q={lim:Infinity};const api={
+ orderBy(){return api},limit(n){q.lim=n;return api},
+ async get(){let out=[],from=0;while(out.length<q.lim){const to=Math.min(from+999,q.lim-1);
+  let r=sb.from("docs").select("id,data").eq("col",col);if(id!==undefined)r=r.eq("id",id);
+  r=r.order("created",{ascending:true}).order("id",{ascending:true});const{data,error}=await r.range(from,to);if(error)throw error;
+  out=out.concat(data);if(data.length<to-from+1)break;from=to+1}return out},
+ onSnapshot(next,err){const L={rows:[],loading:false,buf:[],t:0,dead:false,ver:0};
+  const emit=()=>{if(L.dead)return;if(id!==undefined)next({data:()=>L.rows[0]?L.rows[0].data:undefined});else next({docs:L.rows.map(r=>({id:r.id,data:()=>r.data}))})};
+  const kick=()=>{clearTimeout(L.t);L.t=setTimeout(emit,120)};
+  const now=p=>{const n=p.new,o=p.old;
+   if(p.eventType==="DELETE"){const k=o&&o.id;if(!k||(o.col&&o.col!==col))return false;const i=L.rows.findIndex(r=>r.id===k);if(i<0)return false;L.rows.splice(i,1);return true}
+   if(!n||n.col!==col||(id!==undefined&&n.id!==id))return false;
+   const i=L.rows.findIndex(r=>r.id===n.id),r={id:n.id,data:n.data};if(i<0)L.rows.push(r);else L.rows[i]=r;return true};
+  L.apply=p=>{if(L.dead)return;if(L.loading){L.buf.push(p);return}if(now(p))kick()};
+  L.run=async()=>{const v=++L.ver;L.loading=true;
+   try{const r=await api.get();if(L.dead||v!==L.ver)return;L.rows=r;L.buf.forEach(now);L.buf=[];L.loading=false;emit()}
+   catch(e){if(v===L.ver){L.loading=false;L.buf.forEach(now);L.buf=[];kick()}err&&err(e)}};
+  LIVE.add(L);liveStart();L.run();
+  return()=>{L.dead=true;LIVE.delete(L)}},
+ async add(data){const nid=crypto.randomUUID();const{error}=await sb.from("docs").insert({col,id:nid,data});if(error)throw error;localEv({eventType:"INSERT",new:{col,id:nid,data}});return nid},
+ async set(data){const{error}=await sb.from("docs").upsert({col,id,data},{onConflict:"col,id"});if(error)throw error;localEv({eventType:"UPDATE",new:{col,id,data}})},
+ async delete(){const{error}=await sb.from("docs").delete().eq("col",col).eq("id",id);if(error)throw error;localEv({eventType:"DELETE",old:{col,id}})}
+};return api}
+const DB={doc:p=>{const a=p.split("/");return Q(a[0],a[1])},collection:c=>Q(c)};
+function loginUI(){return new Promise(res=>{
+ $("#nav").innerHTML="";
+ $("#v").innerHTML='<div class="card"><h3 style="margin-top:0">Sign in</h3><label>Email / username</label><input id="em" type="email" autocomplete="username"><label>Password</label><input id="pw" type="password" autocomplete="current-password"><button id="go" class="on" style="margin-top:14px;width:100%;padding:13px">Sign in</button><p id="le" class="m"></p></div>';
+ const go=async()=>{$("#le").textContent="";const{data,error}=await sb.auth.signInWithPassword({email:$("#em").value.trim(),password:$("#pw").value});
+  if(error){$("#le").textContent="Wrong email or password";tr($("#le"));return}res(data.session)};
+ tr($("#v"));$("#go").onclick=go;$("#pw").addEventListener("keydown",e=>{if(e.key==="Enter")go()})})}
+async function bootSB(){
+ if(typeof SB_URL==="undefined"||SB_URL.startsWith("PASTE"))throw new Error("Open config.js and paste your Supabase URL and key");
+ sb=supabase.createClient(SB_URL,SB_KEY);
+ let{data:{session}}=await sb.auth.getSession();
+ while(!session)session=await loginUI();
+ const uid=session.user.id,{data:pf,error}=await sb.from("profiles").select("name,role").eq("id",uid).single();
+ if(error)throw new Error("Your profile was not found. Ask the admin.");
+ const USR={me:async()=>({id:uid,name:pf.name}),canEdit:async()=>pf.role==="admin",
+  profiles:async ids=>{const{data}=await sb.from("profiles").select("id,name").in("id",ids);const o={};(data||[]).forEach(x=>o[x.id]={name:x.name});return o}};
+ const DL={save:async({filename,data})=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:"text/csv;charset=utf-8"}));a.download=filename;document.body.appendChild(a);a.click();a.remove()}};
+ return[DB,USR,DL]}
+(async()=>{
+ try{
+  const r=await bootSB();db=r[0];usr=r[1];dl=r[2];
+  me=await usr.me();admin=await usr.canEdit();
+  $("#who").innerHTML=esc(me.name)+'<span class="chip">'+(admin?"Admin":"Staff")+'</span> <button data-a="out" id="lo">Log out</button>';
+  db.doc("config/main").onSnapshot(s=>{cfg=s.data()||null;refresh()},er);
+  db.collection("products").onSnapshot(s=>{prods=s.docs.map(x=>Object.assign({id:x.id},x.data()));refresh()},er);
+  const byTs=a=>a.sort((x,y)=>(y.ts||0)-(x.ts||0)),wid=s=>s.docs.map(x=>Object.assign({id:x.id},x.data()));
+  db.collection("ret").onSnapshot(s=>{rets=s.docs.map(x=>x.data());refresh()},er);
+  db.collection("cc").onSnapshot(s=>{ccs=byTs(wid(s));loadNames();refresh()},er);
+  db.collection("fx").onSnapshot(s=>{fxs=byTs(wid(s));loadNames();refresh()},er);
+  db.collection("exp").onSnapshot(s=>{exps=byTs(wid(s));loadNames();refresh()},er);
+  db.collection("tx").onSnapshot(s=>{txs=byTs(wid(s));loadNames();refresh()},er);
+  db.collection("pt").onSnapshot(s=>{pts=wid(s).sort((a,b)=>a.id<b.id?1:-1);refresh()},er);
+  db.collection("cm").onSnapshot(s=>{cms=byTs(wid(s));loadNames();refresh()},er);
+  db.collection("sc").onSnapshot(s=>{scs=byTs(wid(s));loadNames();refresh()},er);
+  db.collection("plog").onSnapshot(s=>{plogs=byTs(wid(s));loadNames();refresh()},er);
+  render();
+ }catch(e){$("#v").innerHTML='<p class="card">Could not start: '+esc(e.message)+"</p>"}
+})();
+function loadNames(){const ids=[...new Set(txs.concat(exps,fxs,ccs,scs,plogs,cms).map(t=>t.by).concat(prods.map(p=>p.addedBy)))].filter(i=>i&&!names[i]);if(!ids.length)return;
+ usr.profiles(ids).then(p=>{for(const i in p)names[i]=p[i].name||"Staff";if(tab!=="new")render()}).catch(()=>{})}
+let stale=false;
+const typing=()=>{const a=document.activeElement;return!!(a&&a.closest&&a.closest("#v")&&a.matches("input,select,textarea"))};
+function refresh(){if(tab==="new"&&built){if(typing()){stale=true;upd();bannerUpd(navUpd())}else render()}else if(typing()){stale=true;return}else render()}
+
+function render(){render0();tr(document.body)}
+function render0(){
+ built=false;stale=false;
+ const od=navUpd();
+ if(!cfg){$("#v").innerHTML=`<p class="card">${admin?"No data yet. Prices and products have not been loaded.":"Waiting for the owner to set up prices and products…"}</p>`;return}
+ $("#v").innerHTML=tab==="new"?viewNew():tab==="tx"?viewTx():tab==="inv"?viewInv():tab==="exp"?viewExp():tab==="out"?viewOut():tab==="cc"?viewCC():tab==="cash"?viewCash():tab==="owe"?viewOwe():tab==="rep"?viewRep():viewSet();
+ bannerUpd(od);
+ if(tab==="cc")updCC();
+ if(tab==="new"){built=true;upd()}
+}
+
+/* ---------- New transaction ---------- */
+function calc(){
+ let unit,item="",extra=0;const vc=F.type==="rent"?Math.max(1,+F.vc||1):1,disc=F.type==="maint"?0:(+F.disc||0)*rate(F.dcur||"EGP");
+ const eu=(k,L)=>{if(F.ok!==k){F.ok=k;F.ou=L==null?"":L;const e=$("#ouin");if(e)e.value=F.ou}return F.ou===""||F.ou==null||isNaN(+F.ou)||+F.ou<0?undefined:+F.ou};
+ if(F.type==="rent"){item=F.veh;const L=(cfg.rent[F.veh]||{})[F.dur];unit=F.editId?eu("r|"+F.veh+"|"+F.dur,L):L}
+ else if(F.type==="sale"){const p=prods.find(x=>x.id===F.pid),L=p?pEGP(p):undefined;item=p?p.name:F.pid===F.opid?F.oi:"";unit=F.editId?eu("s|"+F.pid,L):L}
+ else{item=(F.work||"").trim();unit=F.amt===""||F.amt==null?undefined:+F.amt;if(!(unit>=0))unit=undefined}
+ const qty=F.type==="maint"?1:F.qty,ok=typeof unit==="number"&&!!item&&qty>0;
+ return{item,unit,disc,extra,vc,qty,ok,total:ok?unit*qty*vc+extra-disc:null}
+}
+function upd(){upd0();tr($("#v"))}
+function upd0(){
+ const c=calc(),el=$("#tot");if(!el)return;
+ const dn=$("#dn");if(dn)dn.textContent=F.date&&F.date!==today()?"⚠ Recording for a past date: "+F.date:"";
+ const vn=$("#vcn");if(vn)vn.textContent=F.vc||1;
+ const ol=$("#oulist");if(ol){const p=prods.find(x=>x.id===F.pid),L=F.type==="rent"?(cfg.rent[F.veh]||{})[F.dur]:p?pEGP(p):undefined;ol.innerHTML=L!=null&&Math.abs(L-(+F.ou||0))>0.005?`Current price list: ${n0(L)} EGP <button data-a="uselist" data-v="${L}" style="margin-inline-start:6px;padding:4px 12px">Use it</button>`:"";tr(ol)}
+ if(!c.ok){el.innerHTML='<span class="m">'+(F.type==="maint"?"Write the work done and the amount":"Choose all options")+'</span>';$("#sv").disabled=true;return}
+ const cur=pcur(F.pay),ex=cur==="EGP"?c.total:c.total/rate(cur),pi=$("#paid");
+ el.innerHTML=`<span class="m">Total after discount</span><br>`+(cur==="EGP"?`<b>${n0(c.total)} EGP</b>`:`<b>${ex.toFixed(2)} ${cur}</b> <span class="m">(${n0(c.total)} EGP)</span>`);
+ $("#plab").textContent="Amount you actually collected ("+cur+")";
+ if(!F.paidT)pi.value=cur==="EGP"?Math.round(ex):ex.toFixed(2);
+ const cb=$("#chgbox");if(cb){const fx=cur!=="EGP";cb.style.display=fx?"block":"none";if(!fx)F.chg=false;const on=fx&&F.chg;$("#chgf").style.display=on?"block":"none";
+  ["#plab","#paid","#pd"].forEach(q=>{const e=$(q);if(e)e.style.display=on?"none":""});
+  if(on){$("#givlab").textContent="Customer gave ("+cur+")";const g=+F.given||0,sg=Math.max(0,Math.round((g-ex)*rate(cur)));if(!F.chgT){F.chgE=g?sg:"";$("#chgE").value=F.chgE}
+   const ce=+F.chgE||0,pd=g-ce/rate(cur),dd=Math.round((pd-ex)*rate(cur));
+   $("#chgnote").textContent=g?("Rental/sale: "+ex.toFixed(2)+" "+cur+" · change should be about "+n0(sg)+" EGP (rate "+rate(cur)+")"+(Math.abs(dd)>=1?" · difference "+(dd>0?"+":"")+n0(dd)+" EGP":"")):"Type how much the customer gave.";tr($("#chgnote").parentNode)}}
+ const df=F.chg&&cur!=="EGP"?0:(F.paidT?+pi.value:ex)-ex;
+ const ob=$("#owebox");if(ob){const short=F.paidT&&df<-0.005;ob.style.display=short?"block":"none";if(!short)F.owe=false;$("#owephone").style.display=F.owe&&short?"block":"none";$("#owelab").textContent="Customer will pay the rest later"+(short?" (remaining: "+(cur==="EGP"?n0(-df)+" EGP":(-df).toFixed(2)+" "+cur)+")":"")}
+ $("#pd").textContent=Math.abs(df)>0.005?"Difference from total: "+(df>0?"+":"")+df.toFixed(cur==="EGP"?0:2)+" "+cur:"";
+ $("#sv").disabled=c.total<0;const qe=$("#q");if(qe)qe.textContent=F.qty;
+}
+function opts(a,cur){return a.map(o=>`<option value="${esc(o[0])}"${o[0]===cur?" selected":""}${o[2]?" disabled":""}>${esc(o[1])}</option>`).join("")}
+function durOpts(){const d=D.filter(x=>typeof(cfg.rent[F.veh]||{})[x]==="number");if(!d.includes(F.dur))F.dur=d[0];return opts(d.map(x=>[x,x+" – "+n0(cfg.rent[F.veh][x])+" EGP"]),F.dur)}
+function viewNew(){
+ const vehs=Object.keys(cfg.rent||{});if(!vehs.includes(F.veh))F.veh=vehs[0];
+ const ps=[...prods].sort((a,b)=>(a.cat+a.name).localeCompare(b.cat+b.name));
+ const eq=id=>F.editId&&id===F.opid?F.oq:0,stE=id=>stock(id)+eq(id);
+ if(!ps.some(p=>p.id===F.pid&&stE(p.id)>0)){const f=ps.find(p=>stE(p.id)>0);F.pid=f?f.id:""}
+ const step=(a,id,v)=>`<div class="st"><button data-a="${a}" data-v="-1">−</button><b id="${id}">${v}</b><button data-a="${a}" data-v="1">+</button></div>`;
+ const E0=F.editId&&txs.find(x=>x.id===F.editId);
+ let h=(E0?`<div class="card" style="border-color:var(--pri);margin-top:6px"><b>Editing transaction</b> <span class="m">${esc(E0.item)} · ${E0.date}${E0.customer?" · "+esc(E0.customer):""}</span> <button data-a="fcancel" style="margin-inline-start:8px">Cancel</button></div>`:"")+`<div class="row" style="margin-top:6px">${Object.keys(TN).map(k=>`<button data-a="type" data-v="${k}" class="${F.type===k?"on":""}">${TN[k]}</button>`).join("")}</div><div class="card">${admin?`<label style="margin-top:0">Date (choose a past day to add old transactions)</label><input type="date" data-f="date" value="${F.date||today()}" max="${today()}"><div id="dn" class="m"></div>`:""}`;
+ if(F.type==="rent")h+=`<label>Vehicle</label><select data-f="veh">${opts(vehs.map(v=>[v,v]),F.veh)}</select><label>Number of vehicles</label>${step("vc","vcn",F.vc||1)}<label>Duration</label><select data-f="dur" id="dur">${durOpts()}</select><label>How long? (Day × 3 = 3 days)</label>${step("q","q",F.qty)}${E0?`<label>Price per unit in this sale (EGP)</label><input id="ouin" data-f="ou" type="number" inputmode="decimal" min="0" value="${esc(F.ou==null?"":F.ou)}"><div id="oulist" class="m"></div>`:""}`;
+ if(F.type==="sale")h+=`<label>Product</label><select data-f="pid">${opts(ps.map(p=>{const s=stE(p.id);return[p.id,`${p.name}${admin?` (${s>0?s+" in stock":"out"})`:s>0?"":" (out)"} – ${n0(pEGP(p))} EGP`,s<=0]}),F.pid)}</select><label>Quantity</label>${step("q","q",F.qty)}${E0?`<label>Price per unit in this sale (EGP)</label><input id="ouin" data-f="ou" type="number" inputmode="decimal" min="0" value="${esc(F.ou==null?"":F.ou)}"><div id="oulist" class="m"></div>`:""}`;
+ if(F.type==="maint")h+=`<label>Bike / vehicle details</label><input data-f="det" value="${esc(F.det||"")}" placeholder="e.g. red scooter"><label>Work done</label><textarea data-f="work" rows="3" placeholder="e.g. changed oil, fixed front brake">${esc(F.work||"")}</textarea><label>Amount charged to client (EGP)</label><input data-f="amt" type="number" inputmode="decimal" min="0" value="${esc(F.amt==null?"":F.amt)}">`;
+ if(F.type!=="maint")h+=`<label>Discount given (optional)</label><div class="row"><input data-f="disc" type="number" inputmode="decimal" min="0" value="${F.disc||""}"><select data-f="dcur">${opts(["EGP","USD","EUR"].map(x=>[x,x]),F.dcur||"EGP")}</select></div>`;
+ h+=`<label>Customer name (optional)</label><input data-f="cust" value="${esc(F.cust||"")}"><label>Payment</label><div class="row">${(P.includes(F.pay)?P:P.concat([F.pay])).map(p=>`<button data-a="pay" data-v="${p}" class="${F.pay===p?"on":""}">${p}</button>`).join("")}</div>
+ <label id="plab">Amount you actually collected</label><input data-f="paid" id="paid" type="number" inputmode="decimal" min="0" value="${F.paidT?esc(F.paid):""}"><div id="pd" class="m"></div>
+ <div id="chgbox" style="display:none;margin-top:10px;padding:10px 12px;border:1px dashed var(--pri);border-radius:12px"><label style="display:flex;gap:10px;align-items:center;margin:0;color:var(--fg)"><input type="checkbox" data-f="chg" style="width:22px;height:22px"${F.chg?" checked":""}> <span>Customer paid with a bigger bill and got change in EGP</span></label>
+ <div id="chgf" style="display:${F.chg?"block":"none"}"><div class="row"><div><label id="givlab">Customer gave</label><input data-f="given" id="given" type="number" inputmode="decimal" min="0" value="${esc(F.given||"")}"></div><div><label>Change given (EGP)</label><input data-f="chgE" id="chgE" type="number" inputmode="numeric" min="0" value="${esc(F.chgE==null?"":F.chgE)}"></div></div><p class="m" id="chgnote" style="margin:6px 0 0"></p></div></div>
+ <div id="owebox" style="display:none;margin-top:10px;padding:10px 12px;border:1px dashed var(--wrn);border-radius:12px"><label style="display:flex;gap:10px;align-items:center;margin:0;color:var(--fg)"><input type="checkbox" data-f="owe" style="width:22px;height:22px"${F.owe?" checked":""}> <span id="owelab">Customer will pay the rest later</span></label>
+ <div id="owephone" style="display:${F.owe?"block":"none"}"><label>Customer phone</label><input data-f="phone" type="tel" inputmode="tel" value="${esc(F.phone||"")}"><p class="m" style="margin:6px 0 0">Customer name is required.</p></div></div>
+ <label>Note (optional)</label><input data-f="note" value="${esc(F.note||"")}"><div id="tot"></div><button id="sv" data-a="save">${E0?"Save changes":"Save transaction"}</button></div>`;
+ return h;
+}
+async function save(){
+ const c=calc();if(!c.ok||c.total<0)return;
+ const E0=F.editId&&txs.find(x=>x.id===F.editId);
+ if(F.type==="sale"&&stock(F.pid)+(E0&&F.pid===F.opid?F.oq:0)<F.qty)return toast("Not enough stock");
+ const cur=pcur(F.pay),ex=cur==="EGP"?c.total:c.total/rate(cur);
+ const CH=F.chg&&cur!=="EGP",gv=+F.given,ce=+F.chgE||0;
+ if(CH&&(!(gv>0)||ce<0||isNaN(ce)))return toast("Check the collected amount");
+ let paid=CH?gv-ce/rate(cur):F.paidT?+F.paid:ex;if(isNaN(paid)||paid<0)return toast("Check the collected amount");paid=Math.round(paid*100)/100;
+ const dt=admin&&F.date?F.date:today(),ts=E0?(dt===E0.date?E0.ts:new Date(dt+"T"+new Date(E0.ts).toTimeString().slice(0,8)).getTime()):dt===today()?Date.now():new Date(dt+"T"+new Date().toTimeString().slice(0,8)).getTime();
+ const d={ts:ts,date:dt,by:E0?E0.by:me.id,type:F.type,item:c.item,qty:c.qty,unit:c.unit,disc:c.disc,discAmt:+F.disc||0,discCur:F.dcur||"EGP",extra:c.extra,total:c.total,pay:F.pay,cur:cur,collect:ex,paid:paid,paidE:paid*rate(cur),customer:F.cust||"",note:F.note||""};
+ if(CH){d.given=gv;d.changeEGP=ce}
+ if(!CH&&F.owe&&paid<ex-0.005){if(!(F.cust||"").trim())return toast("Write the customer name");d.owe=true;d.phone=F.phone||"";d.oweAmt=r2v(c.total-paid*rate(cur))}
+ if(F.type==="rent"){d.dur=F.dur;d.cnt=c.vc;if(E0?E0.live:dt===today())d.live=true}if(E0)d.edited={by:me.id,at:Date.now()};if(F.type==="sale"){d.pid=F.pid;const pp=prods.find(x=>x.id===F.pid);if(pp&&pp.cost!=null){d.costN=pp.cost;d.costC=pp.cur||"EGP"}}if(F.type==="maint"){d.det=F.det||"";d.free=true}
+ $("#sv").disabled=true;
+ const fxFor=async id=>{for(const x of fxs.filter(y=>y.ref===id))await db.doc("fx/"+x.id).delete();if(CH&&ce>0)await db.collection("fx").add({ts:ts,date:dt,by:d.by,from:"EGP",fromAmt:ce,to:cur,toAmt:r2v(ce/rate(cur)),ref:id,auto:true})};
+ try{if(E0){await db.doc("tx/"+E0.id).set(d);await fxFor(E0.id);F={type:"rent",qty:1,pay:"Cash EGP"};tab="tx";toast("Saved ✓");render();window.scrollTo(0,0);return}
+  const nid=await db.collection("tx").add(d);if(CH&&ce>0)await fxFor(nid);F={type:F.type,qty:1,pay:F.pay,veh:F.veh,svc:F.svc,date:F.date};toast("Saved ✓"+(dt!==today()?" ("+dt+")":""));render()}catch(e){er(e);$("#sv").disabled=false}
+}
+
+/* ---------- Money owed by customers ---------- */
+let OP={};
+const remainOf=t=>t&&t.owe?Math.max(0,r2v((+t.oweAmt||0)-txs.filter(x=>x.type==="pay"&&x.ref===t.id).reduce((a,x)=>a+(+x.paidE||0),0))):0;
+const owedList=()=>txs.filter(t=>t.owe&&remainOf(t)>0.5);
+function viewOwe(){
+ const L=owedList().sort((a,b)=>a.ts-b.ts),tot=L.reduce((a,t)=>a+remainOf(t),0),paidOf=t=>(+t.paidE||0)+txs.filter(x=>x.type==="pay"&&x.ref===t.id).reduce((a,x)=>a+(+x.paidE||0),0);
+ let h="";
+ const t=OP.id&&txs.find(x=>x.id===OP.id);
+ if(t){const rem=remainOf(t),cur=pcur(OP.pay||"Cash EGP");
+  h+=`<div class="card" style="border-color:var(--pri)"><b>Pay remaining</b> <span class="m">${esc(t.customer)} · ${esc(t.item)}</span>
+  <p class="m">Remaining: ${n0(rem)} EGP${cur!=="EGP"?" = "+(rem/rate(cur)).toFixed(2)+" "+cur:""}</p>
+  <div class="row"><div><label>Payment</label><select data-op="pay">${opts(P.map(x=>[x,x]),OP.pay||"Cash EGP")}</select></div><div><label>Amount (${cur})</label><input data-op="amt" type="number" inputmode="decimal" min="0" value="${esc(OP.amt==null?"":OP.amt)}"></div></div>
+  <label>Note (optional)</label><input data-op="note" value="${esc(OP.note||"")}">
+  <div class="row" style="margin-top:12px"><button data-a="opsave" class="on">Save payment</button><button data-a="opcancel">Cancel</button></div></div>`}
+ h+=`<div class="grid" style="margin-top:6px"><div class="k">Total owed to the shop<b style="color:var(--bad)">${n0(tot)} EGP</b><span class="m">${L.length} customer(s)</span></div></div>
+ <h3>Customers who owe</h3><div class="card tw"><table><tr><th>Date</th><th>Customer</th><th>Phone</th><th>Item</th><th>Total</th><th>Paid</th><th>Remaining</th><th></th></tr>${L.map(t=>`<tr><td>${t.date.slice(5)}</td><td><b>${esc(t.customer)}</b></td><td>${t.phone?`<a href="tel:${esc(t.phone)}">${esc(t.phone)}</a>`:""}</td><td>${esc(t.item)}${t.cnt>1?" ×"+t.cnt:""}</td><td>${n0(t.total)} EGP</td><td>${n0(paidOf(t))} EGP</td><td><b style="color:var(--bad)">${n0(remainOf(t))} EGP</b></td><td><button data-a="oppay" data-v="${t.id}" class="on">Pay remaining</button></td></tr>`).join("")||'<tr><td class="m">Nobody owes money right now</td></tr>'}</table></div>`;
+ const D=txs.filter(t=>t.owe&&remainOf(t)<=0.5).slice(0,20);
+ if(D.length)h+=`<h3>Paid in full</h3><div class="card tw"><table><tr><th>Date</th><th>Customer</th><th>Item</th><th>Total</th><th></th></tr>${D.map(t=>`<tr><td>${t.date.slice(5)}</td><td>${esc(t.customer)}</td><td>${esc(t.item)}</td><td>${n0(t.total)} EGP</td><td><span style="color:var(--ok)">Paid in full ✓</span></td></tr>`).join("")}</table></div>`;
+ return h}
+async function opsave(){const t=txs.find(x=>x.id===OP.id);if(!t)return;const rem=remainOf(t),pay=OP.pay||"Cash EGP",cur=pcur(pay),amt=Math.round(+OP.amt*100)/100;
+ if(!(amt>0))return toast("Check the collected amount");const pe=r2v(amt*rate(cur));if(pe>rem+0.5)return toast("More than the remaining amount");
+ try{await db.collection("tx").add({ts:Date.now(),date:today(),by:me.id,type:"pay",ref:t.id,item:t.item,qty:1,unit:pe,disc:0,discAmt:0,discCur:"EGP",extra:0,total:pe,pay:pay,cur:cur,collect:amt,paid:amt,paidE:pe,customer:t.customer||"",phone:t.phone||"",note:OP.note||""});
+  OP={};toast(pe>=rem-0.5?"Paid in full ✓":"Saved ✓");render()}catch(e){er(e)}}
+
+/* ---------- Transactions + dashboard ---------- */
+const mism=t=>t.type!=="pay"&&!t.owe&&t.collect!=null&&Math.abs(nat(t)-t.collect)>(t.cur==="EGP"?0.5:0.01);
+let onlyDiff=false;
+let drd="";
+function dayReport(day){
+ const mine=x=>admin||x.by===me.id,onD=x=>x.date===day;
+ const R=txs.filter(t=>t.type!=="restock"&&onD(t)&&mine(t)).sort((a,b)=>a.ts-b.ts),X=exps.filter(x=>onD(x)&&mine(x)),F=fxs.filter(x=>onD(x)&&mine(x)),MV=cms.filter(x=>onD(x)&&mine(x)),CC=ccs.filter(x=>onD(x)&&mine(x)).sort((a,b)=>a.ts-b.ts);
+ const sm=(L,f)=>L.reduce((a,x)=>a+(+f(x)||0),0),ty=k=>R.filter(t=>t.type===k);
+ const PM=["Cash EGP","Visa White","Visa Black"].concat(R.some(t=>t.pay==="Visa")?["Visa"]:[]).concat(["InstaPay","Cash USD","Cash EUR"]);
+ const row=(c,N)=>`<tr>${c.map((x,i)=>`<td${N&&N.includes(i)?' class="n"':""}>${x}</td>`).join("")}</tr>`,th=(c,N)=>`<tr>${c.map((x,i)=>`<th${N&&N.includes(i)?' class="n"':""}>${x}</th>`).join("")}</tr>`;
+ const vis=sm(R.filter(t=>isVisa(t.pay)),nat),egpAll=sm(R.filter(t=>t.cur==="EGP"),nat);
+ const ar=lang==="ar",dd=fDate(day,{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+ let h=`<h1>${ar?"تقرير اليوم – "+dd:"Day report – "+dd}</h1><p class="m">${admin?(ar?"كل الموظفين":"All employees"):esc(me.name)} · ${ar?"أُنشئ ":"Made "}${new Date().toLocaleString(loc())}</p>
+ <h2>Summary</h2><div class="g"><div><span>Rentals</span><b>${ty("rent").length}</b><small>${sm(ty("rent"),t=>t.cnt||1)} vehicle(s)</small></div><div><span>Sales</span><b>${ty("sale").length}</b><small>${sm(ty("sale"),t=>t.qty)} item(s)</small></div><div><span>Maintenance</span><b>${ty("maint").length}</b></div>${ty("pay").length?`<div><span>Balance payments</span><b>${ty("pay").length}</b></div>`:""}</div>
+ <h2>Money in</h2><table>${th(["Payment","Transactions","Amount"],[1,2])}${PM.map(m=>{const L=R.filter(t=>t.pay===m),c=pcur(m);return row([m==="Visa"?"Visa (not set)":m,L.length,fmc2(c,sm(L,nat))+" "+c],[1,2])}).join("")}
+ <tr class="t"><td>Total Visa (White + Black)</td><td class="n">${R.filter(t=>isVisa(t.pay)).length}</td><td class="n">${n0(vis)} EGP</td></tr></table>
+ ${vis?`<p class="m">Visa fees (${vfee()}%): −${n2(vis*vfee()/100)} EGP → Visa reaching the bank: ${n2(vis-vis*vfee()/100)} EGP</p>`:""}
+ <h2>Expenses (${X.length})</h2>${X.length?`<table>${th(["Category","Details","Amount"],[2])}${X.map(x=>row([esc(x.cat),esc(x.desc||""),fmc2(x.cur,x.amt)+" "+esc(x.cur)],[2])).join("")}<tr class="t"><td colspan="2">Total</td><td class="n">${mstr(X,x=>x.amt,x=>x.cur)}</td></tr></table>`:'<p class="m">No expenses</p>'}
+ ${F.length?`<h2>Exchanges</h2><table>${th(["Gave","Received"])}${F.map(x=>row([fmc2(x.from,x.fromAmt)+" "+x.from,fmc2(x.to,x.toAmt)+" "+x.to])).join("")}</table>`:""}
+ ${MV.length?`<h2>Cash taken out / added</h2><table>${th(["Type","Amount","Note"],[1])}${MV.map(x=>row([mtLabel(x.t),(x.dir==="in"?"+":"−")+fmc2(x.cur,x.amt)+" "+x.cur,esc(x.note||"")],[1])).join("")}</table>`:""}`;
+ if(admin){const A=new Date(day+"T00:00:00").getTime(),f=cashFlow(A,A+864e5-1);if(f.label==="Start of period")f.label="Start of day";h+=`<h2>Cash drawer</h2>${flowTable(f,"= Cash at end of day")}`}
+ const OW=R.filter(t=>t.owe);if(OW.length)h+=`<h2>Customers who owe (from this day)</h2><table>${th(["Customer","Phone","Item","Total","Remaining now"],[3,4])}${OW.map(t=>row([esc(t.customer),esc(t.phone||""),esc(t.item),n0(t.total)+" EGP",remainOf(t)>0.5?n0(remainOf(t))+" EGP":"Paid in full ✓"],[3,4])).join("")}</table>`;
+ h+=`<h2>All transactions (${R.length})</h2><table>${th(["Time","Type","Item","Payment","Collected"].concat(admin?["By"]:[]),[4])}${R.map(t=>row([new Date(t.ts).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}),TNX[t.type]||"",esc(t.item)+(t.cnt>1?" ×"+t.cnt:"")+(t.dur?" ("+esc(t.dur)+")":"")+(t.note?`<br><small>${esc(t.note)}</small>`:""),esc(t.pay),fmc2(t.cur,nat(t))+" "+t.cur].concat(admin?[esc(nm(t.by))]:[]),[4])).join("")}</table>`;
+ return wrapDoc("Day report "+day,h)}
+function wrapDoc(title,h){const box=document.createElement("div");box.innerHTML=h;tr(box);
+ const rtl=lang==="ar";
+ return`<!doctype html><html lang="${rtl?"ar":"en"}" dir="${rtl?"rtl":"ltr"}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><style>
+ body{font:15px/1.45 system-ui,"Segoe UI",Tahoma,sans-serif;color:#0d2b36;background:#fff;max-width:820px;margin:0 auto;padding:20px}
+ h1{font-size:22px;color:#0a6c88;margin:0 0 4px;border-bottom:4px solid #f2b705;padding-bottom:8px}h2{font-size:16px;color:#0a6c88;margin:22px 0 8px}
+ table{width:100%;border-collapse:collapse}td,th{padding:6px 8px;border-bottom:1px solid #cfdfe5;text-align:start;vertical-align:top}th{color:#5b7480;font-weight:600;font-size:13px}.n{text-align:end;white-space:nowrap}
+ tr.t td{font-weight:700}.m,small{color:#5b7480}.bad{color:#c2413a}.ok{color:#1c8a5a}
+ .g{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.g div{border:1px solid #cfdfe5;border-inline-start:5px solid #0a6c88;border-radius:10px;padding:8px 10px}.g span{display:block;color:#5b7480}.g b{font-size:22px}.g small{display:block}
+ .pb{margin:0 0 16px}.pb button{font:inherit;padding:8px 16px;border:0;border-radius:10px;background:#0a6c88;color:#fff}@media print{.pb{display:none}body{padding:0}}
+ </style></head><body><div class="pb"><button onclick="print()">${rtl?"طباعة / حفظ PDF":"Print / Save as PDF"}</button></div>${box.innerHTML}</body></html>`}
+function saveHtml(name,html){try{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([html],{type:"text/html;charset=utf-8"}));a.download=name;document.body.appendChild(a);a.click();a.remove();toast("Saved ✓")}catch(e){er(e)}}
+function cashReport(){const A=new Date(cr.from+"T00:00:00").getTime(),B=new Date(cr.to+"T23:59:59").getTime()+999,f=cashFlow(A,B);
+ const inR=x=>x.date>=cr.from&&x.date<=cr.to,R=txs.filter(t=>t.type!=="restock"&&inR(t)),X=exps.filter(inR).sort((a,b)=>a.ts-b.ts),MV=cms.filter(inR);
+ const sm=(L,f)=>L.reduce((a,x)=>a+(+f(x)||0),0),fd=d=>new Date(d+"T12:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"});
+ const VM=["Visa White","Visa Black"].concat(R.some(t=>t.pay==="Visa")?["Visa"]:[]),fe=vfee()/100,ins=R.filter(t=>t.pay==="Insta"+"Pay");
+ const n=' class="n"';
+ const ar=lang==="ar",ttl=ar?`تقرير النقدية – ${cr.from!==cr.to?"من "+fDate(cr.from)+" إلى "+fDate(cr.to):fDate(cr.from)}`:`Cash report – ${fDate(cr.from)}${cr.from!==cr.to?" to "+fDate(cr.to):""}`;
+ let h=`<h1>${ttl}</h1><p class="m">${ar?"أُنشئ ":"Made "}${new Date().toLocaleString(loc())}</p>
+ <h2>Total cash</h2><div class="g">${CUR.map(c=>`<div><span>${c}</span><b>${fmc2(c,f.end(c))}</b></div>`).join("")}</div>
+ <h2>Cash drawer</h2>${flowTable(f,"= Total cash")}
+ <h2>Visa (not cash)</h2><table><tr><th></th><th${n}>Collected</th><th${n}>Fee (${vfee()}%)</th><th${n}>After fee</th></tr>${VM.map(m=>{const v=sm(R.filter(t=>t.pay===m),nat);return`<tr><td>${m==="Visa"?"Visa (machine not set)":m}</td><td${n}>${n0(v)}</td><td${n}>−${n2(v*fe)}</td><td${n}>${n2(v-v*fe)}</td></tr>`}).join("")}${(()=>{const v=sm(R.filter(t=>isVisa(t.pay)),nat);return`<tr class="t"><td>Total</td><td${n}>${n0(v)}</td><td${n}>−${n2(v*fe)}</td><td${n}>${n2(v-v*fe)}</td></tr>`})()}</table>
+ <h2>InstaPay (not cash)</h2><table><tr><th></th><th${n}>Transactions</th><th${n}>Amount</th></tr><tr><td>InstaPay</td><td${n}>${ins.length}</td><td${n}>${n0(sm(ins,nat))} EGP</td></tr></table>
+ <h2>Expenses (${X.length})</h2>${X.length?`<table><tr><th>Date</th><th>Category</th><th>Details</th><th${n}>Amount</th></tr>${X.map(x=>`<tr><td>${x.date.slice(5)}</td><td>${esc(x.cat)}</td><td>${esc(x.desc||"")}</td><td${n}>${fmc2(x.cur,x.amt)} ${esc(x.cur)}</td></tr>`).join("")}<tr class="t"><td colspan="3">Total</td><td${n}>${mstr(X,x=>x.amt,x=>x.cur)}</td></tr></table>`:'<p class="m">No expenses</p>'}
+ ${MV.length?`<h2>Cash taken out / added</h2><table><tr><th>Date</th><th>Type</th><th${n}>Amount</th><th>Note</th></tr>${MV.map(x=>`<tr><td>${x.date.slice(5)}</td><td>${mtLabel(x.t)}</td><td${n}>${x.dir==="in"?"+":"−"}${fmc2(x.cur,x.amt)} ${x.cur}</td><td>${esc(x.note||"")}</td></tr>`).join("")}</table>`:""}`;
+ saveHtml(`cash-report_${cr.from}_${cr.to}.html`,wrapDoc("Cash report",h))}
+function dlDay(){const day=drd||today();const html=dayReport(day);
+ try{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([html],{type:"text/html;charset=utf-8"}));a.download=`day-report_${day}.html`;document.body.appendChild(a);a.click();a.remove();toast("Saved ✓")}catch(e){er(e)}}
+function rowsF(){return txs.filter(t=>t.type!=="restock"&&t.date>=flt.from&&t.date<=flt.to&&(admin||t.by===me.id)&&(!flt.type||t.type===flt.type)&&(!flt.by||t.by===flt.by))}
+function viewTx(){
+ const R=rowsF(),pc=nat,ids=[...new Set(txs.filter(t=>t.type!=="restock").map(t=>t.by))];
+ let h=editCard()+`<div class="card"><b>Day report</b><p class="m" style="margin:2px 0 0">Download the whole day: rentals, sales, maintenance, money by payment, expenses and close day.</p><div class="row" style="margin-top:8px;align-items:center"><input type="date" data-dr value="${drd||today()}" max="${today()}"><button data-a="dlday" class="on">⬇ Download day report</button></div></div>
+ <div class="card"><div class="row"><div><label>From</label><input type="date" data-l="from" value="${flt.from}"></div><div><label>To</label><input type="date" data-l="to" value="${flt.to}"></div>
+ <div><label>Type</label><select data-l="type">${opts([["","All"]].concat(Object.keys(TNX).map(k=>[k,TNX[k]])),flt.type)}</select></div>
+ ${admin?`<div><label>Employee</label><select data-l="by">${opts([["","All"]].concat(ids.map(i=>[i,nm(i)])),flt.by)}</select></div>`:""}</div></div>
+ <div class="row" style="margin-top:10px"><button data-a="rng" data-v="today">Today</button><button data-a="rng" data-v="month">This month</button></div>
+ ${(()=>{const n=R.filter(mism).length;return`<label style="display:flex;gap:10px;align-items:center;margin-top:12px;color:var(--fg)"><input type="checkbox" data-od style="width:22px;height:22px"${onlyDiff?" checked":""}> <span style="color:var(${n?"--wrn":"--fg"})">Only where collected ≠ expected (${n})</span></label>`})()}
+ <div class="grid" style="margin-top:10px">${[["Cash EGP",t=>t.pay==="Cash EGP","EGP"],["Visa",t=>isVisa(t.pay),"EGP"],["InstaPay",t=>t.pay==="InstaPay","EGP"],["Cash USD",t=>t.pay==="Cash USD","USD"],["Cash EUR",t=>t.pay==="Cash EUR","EUR"]].map(g=>`<div class="k">${g[0]}<b>${fmc2(g[2],R.filter(g[1]).reduce((a,t)=>a+nat(t),0))} ${g[2]}</b></div>`).join("")}<div class="k">Discounts given<b>${mstr(R,dis,dcu)}</b></div>
+ ${Object.keys(TN).map(k=>`<div class="k">${TN[k]}<b>${mcol(R.filter(t=>t.type===k))}</b></div>`).join("")}
+</div>`;
+ h+=typeTable(R);if(admin){const by=[...new Set(R.map(t=>t.by))];
+  h+=`<h3>By employee</h3><div class="card tw"><table>${by.map(i=>`<tr><td>${esc(nm(i))}</td><td><b>${mcol(R.filter(t=>t.by===i))}</b></td></tr>`).join("")||'<tr><td class="m">No sales</td></tr>'}</table></div>
+  <div style="margin-top:10px"><button data-a="exp"${dl?"":" disabled"}>Export to Excel (CSV)</button></div>`}
+ const RV=onlyDiff?R.filter(mism):R;
+ h+=`<h3>Transactions (${RV.length})</h3><div class="card tw"><table><tr><th>Date</th><th>Type</th><th>Item</th><th>Qty</th><th>Discount</th><th>Expected EGP</th><th>Collected</th><th>Payment</th>${admin?"<th>By</th>":""}<th>Customer</th>${admin?"<th></th>":""}</tr>`+
+ RV.map(t=>`<tr${mism(t)?' style="background:color-mix(in srgb,var(--wrn) 12%,transparent)"':""}><td>${t.date.slice(5)} ${new Date(t.ts).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</td><td>${TNX[t.type]||""}</td><td style="${t.free?"white-space:normal;min-width:180px":""}">${esc(t.item)}${t.cnt>1?" ×"+t.cnt:""}${t.dur?" ("+esc(t.dur)+")":""}${t.edited?' <span class="m">(edited)</span>':""}</td><td>${t.qty}</td><td>${t.disc?n0(t.discAmt!=null?t.discAmt:t.disc)+" "+(t.discCur||"EGP"):""}</td><td>${n0(t.total)}</td><td><b>${(t.cur==="EGP"?n0(pc(t)):pc(t).toFixed(2))+" "+t.cur}</b>${t.changeEGP?`<br><span class="m">gave ${fmc2(t.cur,t.given)} ${t.cur} · change ${n0(t.changeEGP)} EGP</span>`:""}${mism(t)?`<br><span class="m" style="color:var(--wrn)">${nat(t)-t.collect>0?"+":"−"}${t.cur==="EGP"?n0(Math.abs(nat(t)-t.collect)):Math.abs(nat(t)-t.collect).toFixed(2)} ${t.cur}</span>`:t.owe&&remainOf(t)>0.5?`<br><span class="m" style="color:var(--bad)">owes ${n0(remainOf(t))} EGP</span>`:""}</td><td>${esc(t.pay)}</td>${admin?`<td>${esc(nm(t.by))}</td>`:""}<td>${esc(t.customer)}</td>${admin?`<td><button data-a="edit" data-v="${t.id}">Edit</button> <button data-a="del" data-v="${t.id}">${armed===t.id?"Sure?":"✕"}</button></td>`:""}</tr>`).join("")+"</table></div>";
+ return h;
+}
+async function exp(){
+ const R=rowsF(),q=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"';
+ const hd=["Date","Time","Type","Item","Duration","Qty","Vehicles","Unit EGP","Discount amount","Discount currency","Extra","Expected total EGP","Payment","Collected","Currency","Employee","Customer","Note"];
+ const csv=[hd.map(q).join(",")].concat(R.map(t=>[t.date,new Date(t.ts).toLocaleTimeString(),TNX[t.type],t.item,t.dur||"",t.qty,t.type==="rent"?(t.cnt||1):"",t.unit,t.discAmt!=null?t.discAmt:t.disc,t.discCur||"EGP",t.extra,t.total,t.pay,(+nat(t)).toFixed(2),t.cur,nm(t.by),t.customer,t.note].map(q).join(","))).join("\n");
+ try{await dl.save({filename:`transactions_${flt.from}_${flt.to}.csv`,data:"\ufeff"+csv})}catch(e){er(e)}
+}
+
+/* ---------- Expenses ---------- */
+const EXC=["Fuel","Spare parts","Salaries","Shop rent","Electricity / water","Food / drinks","Cleaning","Transport","Other"];
+const exRows=()=>exps.filter(x=>x.date>=flt.from&&x.date<=flt.to&&(admin||x.by===me.id)&&(!flt.xc||x.cat===flt.xc)&&(!flt.by||x.by===flt.by));
+const exRange=()=>exps.filter(x=>x.date>=flt.from&&x.date<=flt.to).reduce((a,x)=>a+x.amtE,0);
+function viewExp(){
+ if(!X.date)X.date=today();if(!X.cat)X.cat=EXC[0];if(!X.cur)X.cur="EGP";
+ const R=exRows(),ids=[...new Set(exps.map(x=>x.by))],tot=mstr(R,x=>x.amt,x=>x.cur),bc={};R.forEach(x=>{(bc[x.cat]=bc[x.cat]||[]).push(x)});
+ let h=`<div class="card"><b>New expense</b>${admin?`<label>Date</label><input type="date" data-x="date" value="${X.date}" max="${today()}">`:""}
+ <label>Category</label><select data-x="cat">${opts(EXC.map(c=>[c,c]),X.cat)}</select>
+ <label>Details (what was it for?)</label><input data-x="desc" value="${esc(X.desc||"")}" placeholder="e.g. 20 litres petrol for scooter">
+ <label>Amount</label><div class="row"><input data-x="amt" type="number" inputmode="decimal" min="0" value="${esc(X.amt||"")}"><select data-x="cur">${opts(["EGP","USD","EUR"].map(c=>[c,c]),X.cur)}</select></div>
+ <button data-a="xsave" class="on" style="margin-top:14px;width:100%;padding:13px">Save expense</button></div>${fxCard()}${mvCard()}
+ <div class="card"><div class="row"><div><label>From</label><input type="date" data-l="from" value="${flt.from}"></div><div><label>To</label><input type="date" data-l="to" value="${flt.to}"></div>
+ <div><label>Category</label><select data-l="xc">${opts([["","All"]].concat(EXC.map(c=>[c,c])),flt.xc||"")}</select></div>
+ ${admin?`<div><label>Employee</label><select data-l="by">${opts([["","All"]].concat(ids.map(i=>[i,nm(i)])),flt.by)}</select></div>`:""}</div>
+ <div class="row" style="margin-top:8px"><button data-a="rng" data-v="today">Today</button><button data-a="rng" data-v="month">This month</button></div></div>
+ <div class="grid" style="margin-top:10px"><div class="k">Total expenses<b>${tot}</b></div>${Object.entries(bc).sort((a,b)=>b[1].length-a[1].length).map(x=>`<div class="k">${esc(x[0])}<b>${mstr(x[1],y=>y.amt,y=>y.cur)}</b></div>`).join("")}</div>
+ <h3>Expenses (${R.length})</h3><div class="card tw"><table><tr><th>Date</th><th>Category</th><th>Details</th><th>Amount</th>${admin?"<th>By</th><th></th>":""}</tr>`+
+ R.map(x=>`<tr><td>${x.date.slice(5)}</td><td>${esc(x.cat)}</td><td style="white-space:normal;min-width:160px">${esc(x.desc)}</td><td><b>${x.cur==="EGP"?n0(x.amt):(+x.amt).toFixed(2)} ${x.cur}</b></td>${admin?`<td>${esc(nm(x.by))}</td><td><button data-a="xdel" data-v="${x.id}">${armed===x.id?"Sure?":"✕"}</button></td>`:""}</tr>`).join("")+"</table></div>";
+ const fa=(c,v)=>(c==="EGP"?n0(v):(+v).toFixed(2))+" "+c,fr=x=>{let a,m,b,n;if(x.from==="EGP"){a=x.to;m=+x.toAmt;b="EGP";n=+x.fromAmt}else{a=x.from;m=+x.fromAmt;b=x.to;n=+x.toAmt}return"1 "+a+" = "+(n/m).toFixed(2)+" "+b};
+ const FR=fxs.filter(x=>x.date>=flt.from&&x.date<=flt.to&&(admin||x.by===me.id)&&(!flt.by||x.by===flt.by));
+ h+=`<h3>Exchanges (${FR.length})</h3><div class="card tw"><table><tr><th>Date</th><th>Exchange</th><th>Rate</th>${admin?"<th>By</th><th></th>":""}</tr>`+FR.map(x=>`<tr><td>${x.date.slice(5)}</td><td><b>${fa(x.from,x.fromAmt)} → ${fa(x.to,x.toAmt)}</b>${x.ref?' <span class="m">(change)</span>':""}</td><td>${fr(x)}</td>${admin?`<td>${esc(nm(x.by))}</td><td><button data-a="fxdel" data-v="${x.id}">${armed===x.id?"Sure?":"✕"}</button></td>`:""}</tr>`).join("")+"</table></div>";
+ const MR=cms.filter(x=>x.date>=flt.from&&x.date<=flt.to&&(admin||x.by===me.id)&&(!flt.by||x.by===flt.by));
+ h+=`<h3>Cash taken out / added (${MR.length})</h3><div class="card tw"><table><tr><th>Date</th><th>Type</th><th>Amount</th>${admin?"<th>By</th>":""}<th>Note</th>${admin?"<th></th>":""}</tr>`+MR.map(x=>`<tr><td>${x.date.slice(5)}</td><td>${mtLabel(x.t)}</td><td><b style="color:var(${x.dir==="in"?"--ok":"--bad"})">${x.dir==="in"?"+":"−"}${fa(x.cur,x.amt)}</b></td>${admin?`<td>${esc(nm(x.by))}</td>`:""}<td style="white-space:normal">${esc(x.note)}</td>${admin?`<td><button data-a="mvdel" data-v="${x.id}">${armed===x.id?"Sure?":"✕"}</button></td>`:""}</tr>`).join("")+"</table></div>";
+ if(admin)h+=`<div style="margin-top:10px"><button data-a="xexp"${dl?"":" disabled"}>Export expenses (CSV)</button></div>`;
+ return h;
+}
+async function xsave(){
+ const amt=+X.amt,desc=(X.desc||"").trim();if(!desc||!(amt>0))return toast("Enter details and amount");
+ const dt=admin&&X.date?X.date:today(),ts=dt===today()?Date.now():new Date(dt+"T"+new Date().toTimeString().slice(0,8)).getTime();
+ try{await db.collection("exp").add({ts:ts,date:dt,by:me.id,cat:X.cat,desc:desc,amt:amt,cur:X.cur,amtE:amt*rate(X.cur)});X={date:X.date,cat:X.cat,cur:X.cur};toast("Saved ✓");render()}catch(e){er(e)}
+}
+async function xexp(){
+ const q=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"',csv=[["Date","Category","Details","Amount","Currency","Employee"].map(q).join(",")].concat(exRows().map(x=>[x.date,x.cat,x.desc,x.amt,x.cur,nm(x.by)].map(q).join(","))).join("\n");
+ try{await dl.save({filename:`expenses_${flt.from}_${flt.to}.csv`,data:"\ufeff"+csv})}catch(e){er(e)}
+}
+
+const CUR=["EGP","USD","EUR"],nat=t=>t.paid!=null?t.paid:t.collect,fmc2=(c,v)=>c==="EGP"?n0(v):(+v).toFixed(2),dis=t=>t.discAmt!=null?t.discAmt:(t.disc||0),dcu=t=>t.discCur||"EGP";
+function mstr(L,af,cf){const o={};L.forEach(x=>{const c=cf(x);o[c]=(o[c]||0)+(+af(x)||0)});const a=CUR.filter(c=>Math.abs(o[c]||0)>0.004).map(c=>fmc2(c,o[c])+" "+c);return a.length?a.join(" + "):"0"}
+const mcol=L=>{const G=[["EGP cash",t=>t.pay==="Cash EGP",0],["EGP Visa",t=>isVisa(t.pay),0],["EGP InstaPay",t=>t.pay==="InstaPay",0],["USD",t=>t.pay==="Cash USD",1],["EUR",t=>t.pay==="Cash EUR",1]];
+ const P=G.map(g=>{const v=L.filter(g[1]).reduce((a,t)=>a+nat(t),0);return v?(g[2]?v.toFixed(2):n0(v))+" "+g[0]:""}).filter(Boolean);return P.length?P.join(" + "):"0"};
+function breakdowns(R){
+ const cat=t=>{const p=prods.find(x=>x.id===t.pid);return p?p.cat:"Other"};
+ const one=(type,title,label,cl,kf,cf)=>{const o={};R.filter(t=>t.type===type).forEach(t=>{const k=kf(t),x=o[k]=o[k]||{n:0,L:[]};x.n+=cf(t);x.L.push(t)});
+  const rows=Object.entries(o).sort((a,b)=>b[1].n-a[1].n);
+  return rows.length?`<h3>${title}</h3><div class="card tw"><table><tr><th>${label}</th><th>${cl}</th><th>Collected</th></tr>${rows.map(x=>`<tr><td>${esc(x[0])}</td><td><b>${x[1].n}</b></td><td>${mcol(x[1].L)}</td></tr>`).join("")}</table></div>`:""};
+ return one("rent","Rentals by vehicle","Vehicle","Vehicles",t=>t.item,t=>t.cnt||1)+one("sale","Sales by category","Category","Units sold",cat,t=>t.qty)+mjobs(R)}
+function mjobs(R){const L=R.filter(t=>t.type==="maint").sort((a,b)=>b.ts-a.ts);if(!L.length)return"";
+ const wk=t=>t.free?t.item:/^Other/.test(t.item||"")?"":t.item;
+ return`<h3>Maintenance jobs (${L.length})</h3><div class="card tw"><table><tr><th>Date</th><th>Bike / vehicle</th><th>Work done</th><th>Note</th><th>Collected</th>${admin?"<th>By</th>":""}</tr>${L.map(t=>`<tr><td>${t.date.slice(5)}</td><td style="white-space:normal">${esc(t.det||"")}</td><td style="white-space:normal;min-width:180px">${esc(wk(t))}</td><td style="white-space:normal;min-width:160px">${esc(t.note||"")}${t.customer?`<div class="m">${esc(t.customer)}</div>`:""}</td><td><b>${(t.cur==="EGP"?n0(nat(t)):nat(t).toFixed(2))+" "+t.cur}</b></td>${admin?`<td>${esc(nm(t.by))}</td>`:""}</tr>`).join("")}<tr><td colspan="4"><b>Total</b></td><td><b>${mcol(L)}</b></td>${admin?"<td></td>":""}</tr></table></div>`}
+function typeTable(R,noh){
+ const cs=(r,f)=>r.filter(f).reduce((a,t)=>a+nat(t),0);
+ const cols=["Cash EGP","Visa White","Visa Black"].concat(R.some(t=>t.pay==="Visa")?["Visa"]:[]).concat(["InstaPay","Cash USD","Cash EUR"]);
+ const fm=(c,v)=>/USD|EUR/.test(c)?v.toFixed(2):n0(v);
+ const line=(l,r)=>[l,r.length].concat(cols.map(c=>cs(r,t=>t.pay===c)),[mstr(r,dis,dcu)]);
+ const rows=Object.keys(TN).concat(R.some(t=>t.type==="pay")?["pay"]:[]).map(k=>line(TNX[k],R.filter(t=>t.type===k))).concat([line("Total",R)]),last=rows.length-1;
+ return`${noh?"":"<h3>Summary by type</h3>"}<div class="card tw"><table><tr><th>Type</th><th>Count</th>${cols.map(c=>`<th>${c==="Visa"?"Visa (not set)":c}</th>`).join("")}<th>Discount</th></tr>${rows.map((r,i)=>{const b=x=>i===last?"<b>"+x+"</b>":x;return`<tr><td>${b(r[0])}</td><td>${b(r[1])}</td>${cols.map((c,j)=>`<td>${b(fm(c,r[2+j]))}</td>`).join("")}<td>${r[r.length-1]}</td></tr>`}).join("")}</table></div>`+breakdowns(R)}
+
+/* ---------- Cash (admin) ---------- */
+function viewCash(){
+ const inR=x=>x.date>=cr.from&&x.date<=cr.to,sm=(a,f)=>a.reduce((s,x)=>s+f(x),0);
+ const R=txs.filter(t=>t.type!=="restock"&&inR(t)),X2=exps.filter(inR),F2=fxs.filter(inR),hasFx=F2.length>0;
+ const cash=c=>sm(R.filter(t=>t.pay==="Cash "+c),nat),ex=c=>sm(X2.filter(x=>x.cur===c),x=>+x.amt),fin=c=>sm(F2.filter(x=>x.to===c),x=>+x.toAmt),fout=c=>sm(F2.filter(x=>x.from===c),x=>+x.fromAmt);
+ const CF=cashFlow(new Date(cr.from+"T00:00:00").getTime(),new Date(cr.to+"T23:59:59").getTime()+999),hand=CF.end;
+ const row=(l,fn,b)=>`<tr><td>${b?"<b>"+l+"</b>":l}</td>${CUR.map(c=>`<td>${b?"<b>"+fmc2(c,fn(c))+"</b>":fmc2(c,fn(c))}</td>`).join("")}</tr>`;
+ const VM=["Visa White","Visa Black"].concat(R.some(t=>t.pay==="Visa")?["Visa"]:[]),vs=m=>sm(R.filter(t=>t.pay===m),nat);
+ const bc={};X2.forEach(x=>{(bc[x.cat]=bc[x.cat]||[]).push(x)});
+ return`<div class="card"><div class="row"><div><label>From</label><input type="date" data-c2="from" value="${cr.from}"></div><div><label>To</label><input type="date" data-c2="to" value="${cr.to}"></div></div>
+ <div class="row" style="margin-top:8px"><button data-a="cr" data-v="today">Today</button><button data-a="cr" data-v="month">This month</button><button data-a="cr" data-v="all">All time</button></div>
+ <button data-a="dlcash" class="on" style="margin-top:8px;width:100%">⬇ Download cash report</button></div>
+ <h3>Total cash</h3><div class="grid">${CUR.map(c=>`<div class="k">${c}<b>${fmc2(c,hand(c))}</b></div>`).join("")}</div>
+ <div class="card tw" style="margin-top:10px">${flowTable(CF,"= Total cash")}
+ <p class="m">Total cash = what should be in the drawer at the end of these dates. Visa and InstaPay are not included.</p></div>
+ <h3>InstaPay (not cash)</h3><div class="grid"><div class="k">InstaPay<b>${n0(sm(R.filter(t=>t.pay==="InstaPay"),nat))} EGP</b><span class="m">${R.filter(t=>t.pay==="InstaPay").length} payment(s)</span></div></div>
+ <h3>Visa (not cash)</h3>${visaBox(VM.map(m=>[m==="Visa"?"Visa (machine not set)":m,vs(m)]))}
+ <h3>Expenses (${X2.length})</h3>${X2.length?`<div class="grid"><div class="k">Total expenses<b>${mstr(X2,x=>x.amt,x=>x.cur)}</b></div>${Object.entries(bc).sort((a,b)=>b[1].length-a[1].length).map(x=>`<div class="k">${esc(x[0])}<b>${mstr(x[1],y=>y.amt,y=>y.cur)}</b></div>`).join("")}</div>
+ <div class="card tw" style="margin-top:10px"><table><tr><th>Date</th><th>Category</th><th>Details</th><th>Amount</th><th>By</th></tr>${X2.map(x=>`<tr><td>${x.date.slice(5)}</td><td>${esc(x.cat)}</td><td style="white-space:normal;min-width:160px">${esc(x.desc)}</td><td><b>${fmc2(x.cur,x.amt)} ${esc(x.cur)}</b></td><td>${esc(nm(x.by))}</td></tr>`).join("")}</table></div>`:'<p class="card m">No expenses</p>'}
+ <div class="grid" style="margin-top:10px"><div class="k">Discounts given (information only)<b>${mstr(R,dis,dcu)}</b></div></div>
+ <h3>Rentals, sales and maintenance</h3>`+typeTable(R,1)}
+function fxCard(){
+ if(!FX.from)FX.from="USD";if(!FX.to)FX.to="EGP";
+ return`<div class="card"><b>Exchange money</b>${admin?`<label>Date</label><input type="date" data-fx="date" value="${FX.date||today()}" max="${today()}">`:""}
+ <div class="row"><div><label>From currency</label><select data-fx="from">${opts(CUR.map(c=>[c,c]),FX.from)}</select></div><div><label>Amount given</label><input data-fx="fa" type="number" inputmode="decimal" min="0" value="${esc(FX.fa||"")}"></div></div>
+ <div class="row"><div><label>To currency</label><select data-fx="to">${opts(CUR.map(c=>[c,c]),FX.to)}</select></div><div><label>Amount received</label><input data-fx="ta" type="number" inputmode="decimal" min="0" value="${esc(FX.ta||"")}"></div></div>
+ <button data-a="fxsave" class="on" style="margin-top:14px;width:100%;padding:13px">Save exchange</button></div>`}
+const MT=[["out_owner","Taken out – owner took cash"],["out_bank","Taken out – bank deposit"],["out_other","Taken out – other"],["in_owner","Added – owner put cash in"],["in_fix","Added – correction (count was higher)"],["out_fix","Taken out – correction (count was lower)"]];
+const mvSign=x=>x.dir==="in"?1:-1,mvIn=(L,c)=>L.filter(x=>x.cur===c&&x.dir==="in"&&x.t!=="in_start").reduce((a,x)=>a+(+x.amt),0),mvSt=(L,c)=>L.filter(x=>x.cur===c&&x.t==="in_start").reduce((a,x)=>a+(+x.amt),0),mvOut=(L,c)=>L.filter(x=>x.cur===c&&x.dir!=="in").reduce((a,x)=>a+(+x.amt),0);
+const mtLabel=k=>(MT.find(x=>x[0]===k)||[k,k])[1];
+function mvCard(){if(!M.t)M.t=MT[0][0];if(!M.cur)M.cur="EGP";
+ return`<div class="card"><b>Cash taken out / added</b><p class="m">Use this when money leaves the drawer and is not a shop expense (owner takes cash, bank deposit), or when cash is put in.</p>${admin?`<label>Date</label><input type="date" data-m="date" value="${M.date||today()}" max="${today()}">`:""}
+ <label>Type</label><select data-m="t">${opts(MT,M.t)}</select>
+ <label>Amount</label><div class="row"><input data-m="amt" type="number" inputmode="decimal" min="0" value="${esc(M.amt||"")}"><select data-m="cur">${opts(CUR.map(c=>[c,c]),M.cur)}</select></div>
+ <label>Note (optional)</label><input data-m="note" value="${esc(M.note||"")}">
+ <button data-a="mvsave" class="on" style="margin-top:14px;width:100%;padding:13px">Save</button></div>`}
+async function mvsave(){const amt=+M.amt;if(!(amt>0))return toast("Enter 0 or more");
+ const dt=admin&&M.date?M.date:today(),ts=M.t==="in_start"?new Date(dt+"T00:00:00").getTime():dt===today()?Date.now():new Date(dt+"T"+new Date().toTimeString().slice(0,8)).getTime();
+ try{await db.collection("cm").add({ts:ts,date:dt,by:me.id,t:M.t,dir:M.t.startsWith("in")?"in":"out",cur:M.cur,amt:amt,note:M.note||""});M={t:M.t,cur:M.cur,date:M.date};toast("Saved ✓");render()}catch(e){er(e)}}
+async function fxsave(){
+ const fa=+FX.fa,ta=+FX.ta;if(FX.from===FX.to||!(fa>0)||!(ta>0))return toast("Choose two different currencies and amounts");
+ const dt=admin&&FX.date?FX.date:today(),ts=dt===today()?Date.now():new Date(dt+"T"+new Date().toTimeString().slice(0,8)).getTime();
+ try{await db.collection("fx").add({ts:ts,date:dt,by:me.id,from:FX.from,fromAmt:fa,to:FX.to,toAmt:ta});FX={from:FX.from,to:FX.to,date:FX.date};toast("Saved ✓");render()}catch(e){er(e)}
+}
+
+/* ---------- Rented now ---------- */
+const DM={"Half Hour":30,"One Hour":60,"Two Hours":120,"Day":1440,"Week":10080};
+function outNow(){const done=new Set(rets.map(r=>r.tid));return txs.filter(t=>t.type==="rent"&&t.live&&!done.has(t.id)).map(t=>({t:t,due:t.ts+(DM[t.dur]||60)*t.qty*60000})).sort((a,b)=>a.due-b.due)}
+function navUpd(){
+ const OUT=outNow(),tabs=[["new","New"],["out","Rented now"+(OUT.length?" ("+OUT.length+")":"")],["owe","Owed"+(owedList().length?" ("+owedList().length+")":"")],["tx",admin?"All sales":"My sales"],["inv","Inventory"],["exp","Expenses / Exchange"],["cc","Close day"]];if(admin)tabs.push(["cash","Cash"],["rep","Report"],["set","Settings"]);
+ $("#nav").innerHTML=tabs.map(t=>`<button data-a="tab" data-v="${t[0]}" class="${tab===t[0]?"on":""}">${t[1]}</button>`).join("");tr($("#nav"));
+ return OUT.filter(x=>x.due<Date.now()).length}
+function bannerUpd(od){const b=$("#odb");if(b)b.remove();const rb=$("#rtb");if(rb)rb.remove();
+ if(admin&&cfg){loadRates();if(rateAlert())$("#v").insertAdjacentHTML("afterbegin",`<div id="rtb" class="card" style="border-color:var(--wrn)"><b style="color:var(--wrn)">⚠ Exchange rates changed</b> <span class="m">Safe rate today: 1 USD = ${sugg("USD").toFixed(2)} · 1 EUR = ${sugg("EUR").toFixed(2)} EGP (yours: ${(+cfg.rates.USD).toFixed(2)} · ${(+cfg.rates.EUR).toFixed(2)})</span><div class="row" style="margin-top:8px"><button data-a="rtupd" class="on">Update</button><button data-a="rtkeep">Keep mine</button></div></div>`),tr($("#rtb"))}const cb=$("#ccb");if(cb)cb.remove();
+ const sb2=$("#scb");if(sb2)sb2.remove();
+ if(admin&&cfg&&tab!=="inv"){const N=scs.filter(x=>!x.applied&&!x.ignored&&scDiff(x).length).length;if(N){$("#v").insertAdjacentHTML("afterbegin",`<div id="scb" class="card" style="border-color:var(--wrn)"><b style="color:var(--wrn)">⚠ ${N} stock count(s) to review</b> <button data-a="tab" data-v="inv" style="margin-inline-start:8px">View</button></div>`);tr($("#scb"))}}
+ if(admin&&cfg&&tab!=="cc"){const U=ccs.filter(x=>hasDiff(x)&&!x.checked).length;if(U){$("#v").insertAdjacentHTML("afterbegin",`<div id="ccb" class="card" style="border-color:var(--wrn)"><b style="color:var(--wrn)">⚠ ${U} cash count(s) with a difference</b> <button data-a="tab" data-v="cc" style="margin-inline-start:8px">View</button></div>`);tr($("#ccb"))}}
+ if(od&&tab!=="out"&&cfg){$("#v").insertAdjacentHTML("afterbegin",`<div id="odb" class="card" style="border-color:var(--bad)"><b style="color:var(--bad)">⚠ ${od} rental(s) overdue</b> <button data-a="tab" data-v="out" style="margin-inline-start:8px">View</button></div>`);tr($("#odb"))}}
+function viewOut(){
+ const L=outNow(),now=Date.now(),fm=ms=>{const m=Math.max(0,Math.round(ms/60000)),d=Math.floor(m/1440),h=Math.floor(m%1440/60);return(d?d+"d ":"")+(h?h+"h ":"")+(m%60)+"m"},tf=x=>new Date(x).toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
+ if(!L.length)return'<p class="card">No rentals out right now</p>';
+ return'<h3 style="margin-top:6px">Rented now</h3><div class="card tw"><table><tr><th>Vehicle</th><th>Customer</th><th>Started</th><th>Due</th><th>Status</th><th></th></tr>'+L.map(x=>{const o=x.due<now;return`<tr><td><b>${esc(x.t.item)}${x.t.cnt>1?" ×"+x.t.cnt:""}</b></td><td>${esc(x.t.customer||"")}</td><td>${tf(x.t.ts)}</td><td>${tf(x.due)}</td><td><b style="color:var(${o?"--bad":"--ok"})">${fm(Math.abs(x.due-now))} ${o?"overdue":"left"}</b></td><td><button data-a="ret" data-v="${x.t.id}">${armed===x.t.id?"Sure?":"Returned"}</button></td></tr>`}).join("")+"</table></div>"}
+
+/* ---------- Close day (blind cash count) ---------- */
+const hasDiff=x=>!!x&&!!x.diff&&CUR.some(c=>Math.abs(+(x.diff[c]||0))>0.005);
+function ccState(){const L=ccs.find(x=>x.kind!=="open")||null,O=ccs.find(x=>x.kind==="open"&&(!L||x.ts>L.ts))||null;return{L,O}}
+const loc=()=>lang==="ar"?"ar-EG-u-nu-latn":"en-GB",fDate=(d,o)=>new Date(d+"T12:00:00").toLocaleDateString(loc(),o||{day:"numeric",month:"long",year:"numeric"});
+const mEndTs=k=>new Date(+k.slice(0,4),+k.slice(5),1).getTime()-1,mName=k=>new Date(+k.slice(0,4),+k.slice(5)-1,1).toLocaleDateString(lang==="ar"?"ar-EG-u-nu-latn":"en-US",{month:lang==="ar"?"long":"short",year:"numeric"});
+function cashBase(upto){let b=null;for(const x of pts){if(!x.hasClose)continue;const e=mEndTs(x.id);if(e<=upto&&(!b||e>b.ts))b={ts:e,x:x}}return b}
+function cashFlow(A,B){const BB=cashBase(B),useB=!!BB&&BB.ts>=A-1,S=useB?BB.ts:A-1,inT=x=>(x.ts||0)>S&&(x.ts||0)<=B;
+ const T=txs.filter(t=>t.type!=="restock"&&inT(t)),X=exps.filter(inT),F=fxs.filter(inT),Mv=cms.filter(inT),sm=(L,f)=>L.reduce((a,x)=>a+(+f(x)||0),0);
+ const o={label:useB?"Closing of "+mName(BB.x.id):"Start of period",hasF:F.length>0,hasM:Mv.some(x=>x.t!=="in_start"),
+  start:c=>useB?+(BB.x["c"+c]||0):drawerBal(c,A-1),cash:c=>sm(T.filter(t=>t.pay==="Cash "+c),nat),ex:c=>sm(X.filter(x=>x.cur===c),x=>x.amt),
+  fi:c=>sm(F.filter(x=>x.to===c),x=>x.toAmt),fo:c=>sm(F.filter(x=>x.from===c),x=>x.fromAmt),mo:c=>mvOut(Mv,c),mi:c=>mvIn(Mv,c)+mvSt(Mv,c)};
+ o.end=c=>o.start(c)+o.cash(c)-o.ex(c)+o.fi(c)-o.fo(c)-o.mo(c)+o.mi(c);return o}
+function flowTable(f,endLabel){const row=(l,fn,b)=>`<tr><td>${b?"<b>"+l+"</b>":l}</td>${CUR.map(c=>`<td>${b?"<b>"+fmc2(c,fn(c))+"</b>":fmc2(c,fn(c))}</td>`).join("")}</tr>`;
+ return`<table><tr><th></th>${CUR.map(c=>`<th>${c}</th>`).join("")}</tr>${row(f.label,f.start)}${row("+ Cash sales",f.cash)}${row("− Expenses",f.ex)}${f.hasF?row("+ Exchanged in",f.fi)+row("− Exchanged out",f.fo):""}${f.hasM?row("− Cash taken out",f.mo)+row("+ Cash added",f.mi):""}${row(endLabel,f.end,1)}</table>`}
+function drawerBal(c,upto){const U=upto||Date.now(),B=cashBase(U),from=B?B.ts:-Infinity,ok=x=>(x.ts||0)>from&&(x.ts||0)<=U;
+ return(B?+(B.x["c"+c]||0):0)+txs.filter(t=>t.type!=="restock"&&ok(t)&&t.pay==="Cash "+c).reduce((a,t)=>a+nat(t),0)-exps.filter(x=>ok(x)&&x.cur===c).reduce((a,x)=>a+(+x.amt),0)
+  +fxs.filter(x=>ok(x)&&x.to===c).reduce((a,x)=>a+(+x.toAmt),0)-fxs.filter(x=>ok(x)&&x.from===c).reduce((a,x)=>a+(+x.fromAmt),0)
+  -mvOut(cms.filter(ok),c)+mvIn(cms.filter(ok),c)+mvSt(cms.filter(ok),c)}
+function ccExp(c){const{O}=ccState();return{op:O?+((O.cnt||{})[c]||0):0,exp:drawerBal(c)}}
+const fmc=(c,v)=>c==="EGP"?n0(v):(+v).toFixed(2);
+const tfm=x=>new Date(x).toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
+const dcol=(d,c)=>`<b style="color:var(${Math.abs(d)>0.005?"--bad":"--ok"})">(${d>0?"+":""}${c?fmc(c,d):d})</b>`;
+function ccEditCard(){if(!admin||!cce)return"";const x=ccs.find(y=>y.id===cce);if(!x)return"";
+ return`<div class="card" style="border-color:var(--pri)"><b>${x.kind==="open"?"Edit opening":"Edit close"}</b> <span class="m">${tfm(x.ts)} – ${esc(nm(x.by))}</span><div class="tw"><table><tr><th></th><th>Counted</th></tr>${CUR.map(c=>`<tr><td><b>${c}</b></td><td><input class="md" type="number" inputmode="decimal" data-ce="${c}" value="${esc(CE[c]==null?"":CE[c])}"></td></tr>`).join("")}</table></div>
+ <label>Note (optional)</label><input data-ce="note" value="${esc(CE.note||"")}"><div class="row" style="margin-top:12px"><button data-a="cesave" class="on">Save changes</button><button data-a="cecancel">Cancel</button></div></div>`}
+function viewCC(){
+ const{L,O}=ccState();CC.cnt=CC.cnt||{};
+ const inp=c=>`<input class="md" type="number" inputmode="decimal" data-cc="n|${c}" value="${esc(CC.cnt[c]===undefined?"":CC.cnt[c])}">`;
+ const note=`<label>Note (optional)</label><input data-cc="note|" value="${esc(CC.note||"")}">`;
+ let h;
+ h=ccEditCard();
+ if(!O)h+=`<div class="card"><b>Start of day</b><p class="m">Count the money in the drawer and type it below.</p><div class="tw"><table><tr><th></th>${admin?"<th>Expected</th>":""}<th>Counted</th>${admin?"<th>Difference</th>":""}</tr>${CUR.map(c=>`<tr><td><b>${c}</b></td>${admin?`<td id="cx-${c}"></td>`:""}<td>${inp(c)}</td>${admin?`<td id="cd-${c}"></td>`:""}</tr>`).join("")}</table></div>${note}<button data-a="ccopen" class="on" style="margin-top:14px;width:100%;padding:13px">Save opening</button></div>`;
+ else h+=`<div class="card"><b>End of day</b><p class="m">Day opened: ${tfm(O.ts)} by ${esc(nm(O.by))}</p><p class="m">Count the money in the drawer and type it below.</p><div class="tw"><table><tr><th></th><th>Opening</th>${admin?"<th>Expected</th>":""}<th>Counted</th>${admin?"<th>Difference</th>":""}</tr>${CUR.map(c=>`<tr><td><b>${c}</b></td><td>${fmc(c,(O.cnt||{})[c]||0)}</td>${admin?`<td id="cx-${c}"></td>`:""}<td>${inp(c)}</td>${admin?`<td id="cd-${c}"></td>`:""}</tr>`).join("")}</table></div>${note}<button data-a="ccsave" class="on" style="margin-top:14px;width:100%;padding:13px">Save close</button></div>`;
+ const H=ccs.filter(x=>admin||x.by===me.id).slice(0,40);
+ h+=`<h3>History</h3><div class="card tw"><table><tr><th>When</th>${admin?"<th>By</th>":""}<th>Type</th>${CUR.map(c=>`<th>${c}</th>`).join("")}${admin?"<th></th>":""}</tr>`+(H.map(x=>{const op=x.kind==="open",cnt=x.cnt||{},df=x.diff||{};
+  const cell=c=>{let v=fmc(c,cnt[c]||0);if(!admin)return v;
+   if(op){if(x.sys)v+=" "+dcol(+(df[c]||0),c)+`<br><span class="m">Expected: ${fmc(c,x.sys[c]||0)}</span>`;else if(x.prev)v+=" "+dcol(+(df[c]||0),c)+`<br><span class="m">Last close: ${fmc(c,x.prev[c]||0)}</span>`;return v}
+   return v+" "+dcol(+(df[c]||0),c)+`<br><span class="m">Expected: ${fmc(c,(x.exp||{})[c]||0)}</span>`};
+  const st=!admin||!hasDiff(x)?"":x.checked?'<span class="m">Checked ✓</span>':`<button data-a="cchk" data-v="${x.id}">Mark checked</button>`;
+  return`<tr${admin&&hasDiff(x)&&!x.checked?' style="background:color-mix(in srgb,var(--bad) 8%,transparent)"':""}><td>${tfm(x.ts)}</td>${admin?`<td>${esc(nm(x.by))}</td>`:""}<td>${op?"Opened":"Closed"}${x.edited?' <span class="m">(edited)</span>':""}</td>${CUR.map(c=>`<td>${cell(c)}</td>`).join("")}${admin?`<td>${st} <button data-a="ccedit" data-v="${x.id}">Edit</button> <button data-a="ccdel" data-v="${x.id}">${armed===x.id?"Sure?":"Undo"}</button>${x.note?`<br><span class="m">${esc(x.note)}</span>`:""}</td>`:""}</tr>`}).join("")||'<tr><td class="m">No data</td></tr>')+"</table></div>";
+ return h}
+function updCC(){if(!admin)return;CUR.forEach(c=>{const x=ccExp(c),e=$("#cx-"+c),d=$("#cd-"+c);if(!e)return;e.textContent=fmc(c,x.exp);const n=CC.cnt&&CC.cnt[c];
+ if(n===undefined||n===""){d.textContent="";return}const df=+n-x.exp;d.innerHTML=`<b style="color:var(${Math.abs(df)>0.005?"--bad":"--ok"})">${df>0?"+":""}${fmc(c,df)}</b>`})}
+async function ccsave(kind){
+ CC.cnt=CC.cnt||{};const{L,O}=ccState();
+ if(kind==="close"&&!O)return render();
+ if(CUR.some(c=>CC.cnt[c]===undefined||CC.cnt[c]===""||isNaN(+CC.cnt[c])))return toast("Type the counted cash for every currency (0 if none)");
+ const cnt={},diff={},d={kind:kind,ts:Date.now(),date:today(),by:me.id,cnt:cnt,note:CC.note||""};CUR.forEach(c=>cnt[c]=+CC.cnt[c]);
+ if(kind==="open"){d.sys={};CUR.forEach(c=>{d.sys[c]=Math.round(drawerBal(c)*100)/100;diff[c]=Math.round((cnt[c]-d.sys[c])*100)/100});d.diff=diff}
+ else{const open={},exp={};CUR.forEach(c=>{const x=ccExp(c);open[c]=x.op;exp[c]=Math.round(x.exp*100)/100;diff[c]=Math.round((cnt[c]-exp[c])*100)/100});Object.assign(d,{open:open,exp:exp,diff:diff,openId:O.id})}
+ try{await db.collection("cc").add(d);CC={};toast(kind==="open"?"Day opened ✓":admin?"Saved ✓":"Saved ✓ – the admin will check it");render()}catch(e){er(e)}
+}
+const r2=v=>Math.round(v*100)/100;
+async function ccEditSave(){const x=ccs.find(y=>y.id===cce);if(!x)return;
+ if(CUR.some(c=>CE[c]===""||CE[c]==null||isNaN(+CE[c])))return toast("Type the counted cash for every currency (0 if none)");
+ const d=Object.assign({},x);delete d.id;d.cnt={};CUR.forEach(c=>d.cnt[c]=+CE[c]);d.note=CE.note||"";d.edited={by:me.id,at:Date.now()};
+ if(x.kind==="open"){const base=x.sys||x.prev;if(base){d.diff={};CUR.forEach(c=>d.diff[c]=r2(d.cnt[c]-(+base[c]||0)))}}
+ else{d.diff={};CUR.forEach(c=>d.diff[c]=r2(d.cnt[c]-(+(x.exp||{})[c]||0)))}
+ try{await db.doc("cc/"+x.id).set(d);
+  if(x.kind==="open"&&!x.sys){const z=ccs.find(y=>y.kind!=="open"&&y.openId===x.id);if(z){const e=Object.assign({},z);delete e.id;e.open={};e.exp={};e.diff={};
+   CUR.forEach(c=>{const ch=d.cnt[c]-(+(x.cnt||{})[c]||0);e.open[c]=d.cnt[c];e.exp[c]=r2((+(z.exp||{})[c]||0)+ch);e.diff[c]=r2((+(z.cnt||{})[c]||0)-e.exp[c])});await db.doc("cc/"+z.id).set(e)}}
+  else{const nx=ccs.filter(y=>y.kind==="open"&&y.ts>x.ts&&y.prev&&!y.sys).sort((a,b)=>a.ts-b.ts)[0];if(nx){const e=Object.assign({},nx);delete e.id;e.prev={};e.diff={};CUR.forEach(c=>{e.prev[c]=d.cnt[c];e.diff[c]=r2((+(nx.cnt||{})[c]||0)-d.cnt[c])});await db.doc("cc/"+nx.id).set(e)}}
+  cce=null;CE={};toast("Saved ✓");render()}catch(e){er(e)}}
+async function ccDel(id){const x=ccs.find(y=>y.id===id);if(!x)return;
+ if(x.kind==="open"&&ccs.some(y=>y.kind!=="open"&&y.openId===x.id))return toast("Undo the close of this day first");
+ try{await db.doc("cc/"+id).delete();toast("Undone ✓")}catch(e){er(e)}}
+async function ccCheck(id){const x=ccs.find(y=>y.id===id);if(!x)return;const d=Object.assign({},x);delete d.id;d.checked={by:me.id,at:Date.now()};try{await db.doc("cc/"+id).set(d);toast("Saved ✓")}catch(e){er(e)}}
+
+/* ---------- Profit (inside Report) ---------- */
+function profitSec(R,X2,P){P=P||[];
+ const uc=t=>{if(t.costN!=null)return{n:t.costN,c:t.costC||"EGP"};if(t.costE!=null)return{n:t.costE,c:"EGP"};const p=prods.find(x=>x.id===t.pid);return p&&p.cost!=null?{n:p.cost,c:p.cur||"EGP"}:null};
+ const rev={},cst={},exc={},by={};let miss=0;CUR.forEach(c=>{rev[c]=0;cst[c]=0;exc[c]=0});
+ const vfe=(R.filter(t=>isVisa(t.pay)).reduce((a,t)=>a+nat(t),0)+P.reduce((a,x)=>a+(+x.visa||0),0))*vfee()/100;R.forEach(t=>{rev[t.cur]=(rev[t.cur]||0)+nat(t)});X2.forEach(x=>{exc[x.cur]=(exc[x.cur]||0)+(+x.amt)});
+ P.forEach(x=>{rev.EGP+=(+x.egp||0)+(+x.visa||0)+(+x.insta||0);rev.USD+=(+x.usd||0);rev.EUR+=(+x.eur||0);exc.EGP+=(+x.exp||0)});
+ R.filter(t=>t.type==="sale").forEach(t=>{const u=uc(t),o=by[t.item]=by[t.item]||{q:0,rv:{},cs:{},m:0};o.q+=t.qty;o.rv[t.cur]=(o.rv[t.cur]||0)+nat(t);
+  if(u){cst[u.c]=(cst[u.c]||0)+u.n*t.qty;o.cs[u.c]=(o.cs[u.c]||0)+u.n*t.qty}else{miss++;o.m=1}});
+ const os=o=>{const a=CUR.filter(c=>Math.abs(o[c]||0)>0.004).map(c=>fmc2(c,o[c])+" "+c);return a.length?a.join(" + "):"0"};
+ const row=(l,f,b)=>`<tr><td>${b?"<b>"+l+"</b>":l}</td>${CUR.map(c=>`<td>${b?"<b>"+fmc2(c,f(c))+"</b>":fmc2(c,f(c))}</td>`).join("")}</tr>`;
+ const prof=x=>{if(x.m)return["no cost",""];const a=Object.keys(x.rv),b=Object.keys(x.cs);if(a.length!==1||b.length>1||(b.length&&b[0]!==a[0]))return["–",""];const c=a[0],r=x.rv[c],k=x.cs[c]||0;return[fmc2(c,r-k)+" "+c,r?Math.round((r-k)/r*100)+"%":""]};
+ return`<h3>Profit</h3><div class="card tw"><table><tr><th></th>${CUR.map(c=>`<th>${c}</th>`).join("")}</tr>${row("Revenue (collected)",c=>rev[c])}${row("− Cost of items sold",c=>cst[c])}${row("− Visa fees",c=>c==="EGP"?vfe:0)}${row("− Expenses",c=>exc[c])}${row("= Net profit",c=>rev[c]-cst[c]-(c==="EGP"?vfe:0)-exc[c],1)}</table>
+ <p class="m">Profit is calculated in each currency separately. Cost counts in the currency it was bought in.</p></div>
+ 
+ <h3>Profit by product</h3><div class="card tw"><table><tr><th>Product</th><th>Sold</th><th>Revenue</th><th>Cost</th><th>Profit</th><th>Margin</th></tr>${Object.entries(by).map(e=>{const x=e[1],p=prof(x);return`<tr><td>${esc(e[0])}</td><td>${x.q}</td><td>${os(x.rv)}</td><td>${os(x.cs)}</td><td><b>${p[0]}</b></td><td>${p[1]}</td></tr>`}).join("")||'<tr><td class="m">No data</td></tr>'}</table></div>`}
+
+/* ---------- Monthly report (admin) ---------- */
+function viewRep(){
+ const ym=k=>k.split("-").map(Number),[Y1,M1]=ym(rf),[Y2,M2]=ym(rt),mS=new Date(Y1,M1-1,1).getTime(),mE=new Date(Y2,M2,1).getTime()-1,inM=x=>(x.ts||0)>=mS&&(x.ts||0)<=mE;
+ const nM=(Y2-Y1)*12+(M2-M1)+1,one=nM===1,mk=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0");
+ const inK=(d,f,t)=>{const k=d.slice(0,7);return k>=f&&k<=t};
+ const R=txs.filter(t=>t.type!=="restock"&&inK(t.date,rf,rt)),EX=exps.filter(x=>inK(x.date,rf,rt)),Rc=R.filter(t=>t.cur===rc);
+ const PP=pts.filter(x=>x.id>=rf&&x.id<=rt),ptv=(L,k)=>L.reduce((a,x)=>a+(+x[k]||0),0),ptRc=x=>rc==="EGP"?(+x.egp||0)+(+x.visa||0)+(+x.insta||0):rc==="USD"?(+x.usd||0):(+x.eur||0);
+ const mnm=k=>new Date(+k.slice(0,4),+k.slice(5)-1,1).toLocaleDateString(lang==="ar"?"ar-EG-u-nu-latn":"en-US",{month:lang==="ar"?"long":"short",year:"numeric"});
+ const pf=mk(new Date(Y1,M1-1-nM,1)),pt=mk(new Date(Y1,M1-2,1)),RP=txs.filter(t=>t.type!=="restock"&&inK(t.date,pf,pt)),PPP=pts.filter(x=>x.id>=pf&&x.id<=pt);
+ const sum=(L,f)=>L.reduce((a,x)=>a+(+f(x)||0),0);
+ const grpP=[["Cash EGP",t=>t.pay==="Cash EGP","EGP","egp"],["Visa",t=>isVisa(t.pay),"EGP","visa"],["InstaPay",t=>t.pay==="InstaPay","EGP","insta"],["Cash USD",t=>t.pay==="Cash USD","USD","usd"],["Cash EUR",t=>t.pay==="Cash EUR","EUR","eur"]];
+ const chg=(g)=>{const a=sum(R.filter(g[1]),nat)+ptv(PP,g[3]),b=sum(RP.filter(g[1]),nat)+ptv(PPP,g[3]);if(!b)return"";const d=Math.round((a-b)/b*100);return`<span class="m" style="color:var(${d>=0?"--ok":"--bad"})">${d>=0?"+":""}${d}% vs previous period</span>`};
+ const grp=(L,kf,af)=>{const o={};L.forEach(t=>{const k=kf(t);o[k]=(o[k]||0)+af(t)});return Object.entries(o).sort((x,y)=>y[1]-x[1])};
+ const hb=arr=>{const m=Math.max(1,...arr.map(x=>x[1]));return arr.length?arr.map(x=>`<div class="hb"><span>${esc(x[0])}</span><i style="width:${Math.max(2,x[1]/m*100)}%"></i><b>${fmc2(rc,x[1])}</b></div>`).join(""):'<p class="m">No data</p>'};
+ let bars,lab;if(one){const nd=new Date(Y1,M1,0).getDate();bars=Array(nd).fill(0);Rc.forEach(t=>{bars[+t.date.slice(8,10)-1]+=nat(t)});lab=i=>i===0||(i+1)%5===0?i+1:""}
+ else{const ks=[];for(let i=0;i<nM;i++)ks.push(mk(new Date(Y1,M1-1+i,1)));bars=ks.map(k=>sum(Rc.filter(t=>t.date.slice(0,7)===k),nat)+PP.filter(x=>x.id===k).reduce((a,x)=>a+ptRc(x),0));const mn=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];lab=i=>nM<=12||i%2===0?mn[+ks[i].slice(5)-1]:""}
+ const mx=Math.max(1,...bars);
+ const PM=["Cash EGP","Visa White","Visa Black"].concat(R.some(t=>t.pay==="Visa")?["Visa"]:[]).concat(["InstaPay","Cash USD","Cash EUR"]);
+ const pmRows=PM.map(m=>{const L=R.filter(t=>t.pay===m);return{m,c:pcur(m),n:L.length,v:sum(L,nat)}});
+ const vis=sum(R.filter(t=>isVisa(t.pay)),nat)+ptv(PP,"visa"),vf=vis*vfee()/100;
+ const CF=cashFlow(mS,mE);
+ const ec=grp(EX,x=>x.cat,()=>1),ecL=k=>EX.filter(x=>x.cat===k);
+ const ty=Object.keys(TN).concat(R.some(t=>t.type==="pay")?["pay"]:[]).map(k=>{const L=R.filter(t=>t.type===k);return[TNX[k],L.length,mcol(L),mstr(L,dis,dcu)]});
+ return`<div class="card"><div class="row"><div><label style="margin-top:0">From month</label><input type="month" data-r="f" value="${rf}"></div><div><label style="margin-top:0">To month</label><input type="month" data-r="t" value="${rt}"></div><div><label style="margin-top:0">Currency for the charts</label><select data-r="c">${opts(CUR.map(c=>[c,c]),rc)}</select></div></div>
+ <div class="row" style="margin-top:8px"><button data-a="rr" data-v="1">This month</button><button data-a="rr" data-v="3">Last 3 months</button><button data-a="rr" data-v="y">This year</button></div></div>
+
+ <h3>Overview</h3><div class="grid">${grpP.map(g=>`<div class="k">${g[0]}<b>${fmc2(g[2],sum(R.filter(g[1]),nat)+ptv(PP,g[3]))} ${g[2]}</b></div>`).join("")}<div class="k">Transactions<b>${R.length}</b></div><div class="k">Owed by customers now<b style="color:var(--bad)">${n0(owedList().reduce((a,t)=>a+remainOf(t),0))} EGP</b></div></div>
+ ${PP.length?`<p class="m">Includes past totals for: ${PP.map(x=>mnm(x.id)).reverse().join(", ")}</p>`:""}
+
+ <h3>1. Money in – by payment method</h3><div class="card tw"><table><tr><th>Payment</th><th>Transactions</th><th>Amount</th></tr>${pmRows.map(r=>`<tr><td>${r.m==="Visa"?"Visa (not set)":r.m}</td><td>${r.n}</td><td><b>${fmc2(r.c,r.v)} ${r.c}</b></td></tr>`).join("")}${PP.length?grpP.filter(g=>ptv(PP,g[3])).map(g=>`<tr><td>Past totals – ${g[0]}</td><td></td><td><b>${fmc2(g[2],ptv(PP,g[3]))} ${g[2]}</b></td></tr>`).join(""):""}</table>
+ <p class="m">Visa fees (${vfee()}%): −${n2(vf)} EGP → Visa reaching the bank: ${n2(vis-vf)} EGP</p></div>
+
+ <h3>2. Cash drawer – in and out</h3><div class="card tw">${flowTable(CF,"= End of period")}
+ <p class="m">Only cash in the drawer. Visa and InstaPay are not in the drawer.</p></div>
+
+ <h3>3. Money out – expenses</h3><div class="card tw"><table><tr><th>Category</th><th>Count</th><th>Amount</th></tr>${ec.map(x=>`<tr><td>${esc(x[0])}</td><td>${x[1]}</td><td><b>${mstr(ecL(x[0]),y=>y.amt,y=>y.cur)}</b></td></tr>`).join("")||'<tr><td class="m">No data</td></tr>'}${ptv(PP,"exp")?`<tr><td>Past totals</td><td></td><td><b>${n0(ptv(PP,"exp"))} EGP</b></td></tr>`:""}<tr><td><b>Total</b></td><td><b>${EX.length}</b></td><td><b>${mstr(EX.concat(ptv(PP,"exp")?[{amt:ptv(PP,"exp"),cur:"EGP"}]:[]),y=>y.amt,y=>y.cur)}</b></td></tr></table></div>
+
+ 
+
+ <h3>4. Sales by type</h3><div class="card tw"><table><tr><th>Type</th><th>Count</th><th>Collected</th><th>Discounts</th></tr>${ty.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td style="white-space:normal"><b>${r[2]}</b></td><td style="white-space:normal">${r[3]}</td></tr>`).join("")}<tr><td><b>Total</b></td><td><b>${R.length}</b></td><td style="white-space:normal"><b>${mcol(R)}</b></td><td style="white-space:normal">${mstr(R,dis,dcu)}</td></tr></table></div>
+ ${breakdowns(R)}
+
+ <h3>5. Charts (${rc})</h3>
+ <div class="card"><b>${one?"Collected per day":"Collected per month"}</b><div class="cols" style="margin-top:10px">${bars.map((v,i)=>`<div title="${fmc2(rc,v)}"><i style="height:${v/mx*100}%"></i><span>${lab(i)}</span></div>`).join("")}</div></div>
+ <div class="card"><b>By employee</b>${hb(grp(Rc,t=>nm(t.by),nat))}</div>
+ <div class="card"><b>Top items</b>${hb(grp(Rc,t=>t.item,nat).slice(0,8))}</div>
+ <div style="margin-top:10px"><button data-a="rexp"${dl?"":" disabled"}>Export (CSV)</button></div>
+ ${ptSection()}`}
+function ptSection(){const f=(k,l)=>`<div><label>${l}</label><input data-pt="${k}" type="number" inputmode="decimal" min="0" value="${esc(PT[k]==null?"":PT[k])}"></div>`;
+ return`<h3>Past totals (before the system)</h3><div class="card"><p class="m" style="margin-top:0">For months before you started using the app. These only count in this Report – not in Cash, Close day, stock or rentals. One entry per month.</p>
+ <label>Month</label><input type="month" data-pt="month" value="${esc(PT.month||"")}">
+ <div class="row">${f("egp","Cash EGP")}${f("visa","Visa (EGP)")}${f("insta","InstaPay (EGP)")}</div><div class="row">${f("usd","Cash USD")}${f("eur","Cash EUR")}${f("exp","Expenses (EGP)")}</div>
+ <p style="margin:16px 0 0"><b>Cash in the drawer at the end of the month</b></p><p class="m" style="margin:2px 0 0">What you really had after everything. The app continues from the latest month you fill in.</p>
+ <div class="row">${f("cEGP","Drawer EGP")}${f("cUSD","Drawer USD")}${f("cEUR","Drawer EUR")}</div>
+ <label>Note (optional)</label><input data-pt="note" value="${esc(PT.note||"")}"><button data-a="ptsave" class="on" style="margin-top:14px;width:100%;padding:13px">Save month</button></div>
+ <div class="card tw"><table><tr><th>Month</th><th>Cash EGP</th><th>Visa</th><th>InstaPay</th><th>USD</th><th>EUR</th><th>Expenses</th><th>Drawer at end</th><th></th></tr>${pts.map(x=>`<tr><td><b>${new Date(+x.id.slice(0,4),+x.id.slice(5)-1,1).toLocaleDateString(lang==="ar"?"ar-EG-u-nu-latn":"en-US",{month:lang==="ar"?"long":"short",year:"numeric"})}</b></td><td>${n0(+x.egp||0)}</td><td>${n0(+x.visa||0)}</td><td>${n0(+x.insta||0)}</td><td>${(+x.usd||0).toFixed(2)}</td><td>${(+x.eur||0).toFixed(2)}</td><td>${n0(+x.exp||0)}</td><td>${x.hasClose?n0(+x.cEGP||0)+" EGP<br>"+(+x.cUSD||0).toFixed(2)+" USD<br>"+(+x.cEUR||0).toFixed(2)+" EUR":"–"}</td><td><button data-a="ptedit" data-v="${x.id}">Edit</button> <button data-a="ptdel" data-v="${x.id}">${armed==="pt"+x.id?"Sure?":"✕"}</button></td></tr>`).join("")||'<tr><td class="m">No data</td></tr>'}</table></div>`}
+async function ptsave(){const k=PT.month;if(!/^\d{4}-\d{2}$/.test(k||""))return toast("Choose a month");
+ const d={month:k,by:me.id,ts:Date.now(),note:PT.note||""};for(const f of["egp","visa","insta","usd","eur","exp","cEGP","cUSD","cEUR"]){const v=PT[f];if(v===""||v==null){d[f]=0;continue}if(isNaN(+v)||+v<0)return toast("Enter 0 or more");d[f]=+v}
+ d.hasClose=["cEGP","cUSD","cEUR"].some(f=>PT[f]!==""&&PT[f]!=null);
+ try{await db.doc("pt/"+k).set(d);PT={};toast("Saved ✓");render()}catch(e){er(e)}}
+
+function editCard(){
+ if(!ed)return"";const t=txs.find(x=>x.id===ed);if(!t)return"";
+ const f=(k,l,ty)=>`<div><label>${l}</label><input data-e="${k}" type="${ty||"text"}" ${ty==="number"?'inputmode="decimal" ':""}value="${esc(E[k])}"></div>`;
+ return`<div class="card" style="border-color:var(--pri)"><b>Edit transaction</b> <span class="m">${esc(t.item)} · ${TNX[t.type]}</span>
+ <div class="row">${f("date","Date","date")}${t.free?"":f("qty","Quantity","number")}${t.type==="rent"?f("cnt","Number of vehicles","number"):""}</div>
+ ${t.free?`<div class="row">${f("work","Work done")}${f("amt","Amount charged to client (EGP)","number")}</div>`:`<div class="row">${f("disc","Discount","number")}<div><label>Discount currency</label><select data-e="dcur">${opts(["EGP","USD","EUR"].map(x=>[x,x]),E.dcur)}</select></div></div>`}
+ ${t.type==="maint"&&!t.free?`<div class="row">${f("extra","Parts / extra (EGP)","number")}</div>`:""}
+ <div class="row"><div><label>Payment</label><select data-e="pay">${opts((P.includes(E.pay)?P:P.concat([E.pay])).map(x=>[x,x]),E.pay)}</select></div>${f("paid","Amount collected (in payment currency)","number")}</div>
+ <div class="row">${f("cust","Customer name")}${f("note","Note")}</div>
+ <div class="row" style="margin-top:12px"><button data-a="esave" class="on">Save changes</button><button data-a="ecancel">Cancel</button></div></div>`}
+async function eSave(){
+ const t=txs.find(x=>x.id===ed);if(!t)return;
+ const fr=!!t.free,unit=fr?+E.amt:t.unit,cn=t.type==="rent"?Math.max(1,Math.round(+E.cnt||1)):1;
+ if(fr&&(E.amt===""||E.amt==null||!(unit>=0)||!String(E.work||"").trim()))return toast("Write the work done and the amount");
+ const q=fr?1:Math.round(+E.qty);if(!(q>0)||!E.date)return toast("Check quantity and date");
+ if(t.type==="sale"&&q>t.qty&&stock(t.pid)<q-t.qty)return toast("Not enough stock");
+ const same=(+E.disc||0)===(t.discAmt!=null?t.discAmt:(t.disc||0))&&E.dcur===(t.discCur||"EGP");
+ const disc=fr?0:same?(t.disc||0):(+E.disc||0)*rate(E.dcur),extra=t.type==="maint"?(+E.extra||0):(t.extra||0);
+ const total=unit*q*cn+extra-disc;if(total<0)return toast("Discount is larger than the total");
+ const cur=pcur(E.pay),rr=cur==="EGP"?1:(cur===t.cur&&t.paid>0&&t.paidE>0?t.paidE/t.paid:rate(cur)),ex=total/rr;
+ let paid=(E.paid===""||E.paid==null)?ex:+E.paid;if(isNaN(paid)||paid<0)return toast("Check the collected amount");paid=Math.round(paid*100)/100;
+ const d=Object.assign({},t);delete d.id;
+ Object.assign(d,{date:E.date,qty:q,disc:disc,discAmt:+E.disc||0,discCur:E.dcur,extra:extra,total:total,pay:E.pay,cur:cur,collect:ex,paid:paid,paidE:paid*rr,customer:E.cust||"",note:E.note||"",edited:{by:me.id,at:Date.now()},unit:unit});if(fr)d.item=String(E.work).trim();if(t.type==="rent")d.cnt=cn;if(t.owe)d.oweAmt=Math.max(0,r2v(total-paid*rr));
+ if(E.date!==t.date)d.ts=new Date(E.date+"T"+new Date(t.ts).toTimeString().slice(0,8)).getTime();
+ try{await db.doc("tx/"+t.id).set(d);ed=null;toast("Saved ✓");render()}catch(e){er(e)}
+}
+/* ---------- Inventory ---------- */
+const canP=()=>admin||!cfg||cfg.staffProducts!==false;
+const scDiff=x=>Object.keys(x.counts||{}).filter(k=>x.counts[k]!==(x.sys||{})[k]);
+const FL={cat:"Category",name:"Product",price:"Price",cost:"Cost",stock:"Stock"};
+const plogAdd=(p,field,from,to)=>db.collection("plog").add({ts:Date.now(),date:today(),by:me.id,pid:p.id,name:p.name,field:field,from:from==null?"":from,to:to==null?"":to}).catch(()=>{});
+function addCard(){return`<h3>Add a new product</h3><div class="card"><div class="row"><input id="np-c" placeholder="Category"><input id="np-n" placeholder="Product name"></div><div class="row" style="margin-top:8px"><input id="np-q" type="number" inputmode="numeric" placeholder="Stock"><input id="np-p" type="number" inputmode="numeric" placeholder="Price">${admin?'<input id="np-k" type="number" inputmode="decimal" placeholder="Cost (optional)">':""}<select id="np-u"><option>EGP</option><option>USD</option><option>EUR</option></select></div><button data-a="addp" style="margin-top:8px">Add product</button></div>`}
+function pmeta(p){return(p.addedBy&&p.addedBy!==me.id||p.addedBy&&admin?`<div class="m">Added by ${esc(nm(p.addedBy))}</div>`:"")+(p.edited?`<div class="m">Edited by ${esc(nm(p.edited.by))} – ${tfm(p.edited.at)}</div>`:"")}
+function viewInv(){
+ const ps=[...prods].sort((a,b)=>(a.cat+a.name).localeCompare(b.cat+b.name));
+ if(!admin){const e=canP();
+  let h=`<div class="card"><b>Count stock</b><p class="m">Count each product on the shelf and type the number. Leave it empty if you did not count it.</p><div class="tw"><table><tr><th>Category</th><th>Product</th><th>Price</th><th>Counted</th></tr>${ps.map(p=>`<tr><td>${e?`<input data-p="${p.id}|cat" value="${esc(p.cat)}" style="min-width:110px">`:esc(p.cat)}</td><td>${e?`<input data-p="${p.id}|name" value="${esc(p.name)}" style="min-width:200px">`:esc(p.name)}</td><td>${e?`<input class="md" type="number" inputmode="decimal" data-p="${p.id}|price" value="${p.price}"> ${esc(p.cur)}`:fmc2(p.cur,p.price)+" "+esc(p.cur)}</td><td><input class="sm" type="number" inputmode="numeric" min="0" data-sc="${p.id}" value="${esc(SC[p.id]==null?"":SC[p.id])}"></td></tr>`).join("")}</table></div>
+  <label>Note (optional)</label><input data-sc="__note" value="${esc(SC.__note||"")}"><button data-a="scsave" class="on" style="margin-top:14px;width:100%;padding:13px">Save count</button></div>`;
+  if(e)h+=addCard();
+  const mine=scs.filter(x=>x.by===me.id).slice(0,10);
+  h+=`<h3>My counts</h3><div class="card tw"><table><tr><th>When</th><th>Products counted</th></tr>${mine.map(x=>`<tr><td>${tfm(x.ts)}</td><td>${Object.keys(x.counts||{}).length}</td></tr>`).join("")||'<tr><td class="m">No data</td></tr>'}</table></div>`;
+  return h}
+ const low=cfg.low==null?1:cfg.low;let tot=0,h="";
+ if(rv){const x=scs.find(y=>y.id===rv);if(x){const D=new Set(scDiff(x));
+  h+=`<div class="card" style="border-color:var(--pri)"><b>Stock count</b> <span class="m">${tfm(x.ts)} – ${esc(nm(x.by))}</span>${x.note?`<p class="m">${esc(x.note)}</p>`:""}<div class="tw"><table><tr><th>Product</th><th>System</th><th>Counted</th><th>Difference</th></tr>${Object.keys(x.counts).map(k=>{const p=prods.find(q=>q.id===k),sy=(x.sys||{})[k]||0,c=x.counts[k],d=c-sy;return`<tr${D.has(k)?' style="background:color-mix(in srgb,var(--bad) 8%,transparent)"':""}><td>${esc(p?p.name:"?")}</td><td>${sy}</td><td><b>${c}</b></td><td><b style="color:var(${d?"--bad":"--ok"})">${d>0?"+":""}${d}</b></td></tr>`}).join("")}</table></div>
+  <div class="row" style="margin-top:12px">${x.applied?'<span class="m">Applied ✓</span>':x.ignored?'<span class="m">Ignored</span>':`${D.size?'<button data-a="scapply" class="on">Apply counts to stock</button><button data-a="scign">Ignore</button>':""}`}<button data-a="scclose">Close</button></div></div>`}}
+ const rows=ps.map(p=>{const s=stock(p.id);tot+=s;const st=s<=0?["OUT","bad"]:s<=low?["LOW","wrn"]:["OK","ok"];
+  return`<tr><td><input data-p="${p.id}|cat" value="${esc(p.cat)}" style="min-width:110px"></td><td><input data-p="${p.id}|name" value="${esc(p.name)}" style="min-width:240px">${pmeta(p)}</td><td><input class="sm" type="number" inputmode="numeric" data-p="${p.id}|stock" value="${s}"></td><td><input class="md" type="number" inputmode="decimal" data-p="${p.id}|price" value="${p.price}"> ${esc(p.cur)}</td><td><input class="md" type="number" inputmode="decimal" data-p="${p.id}|cost" value="${p.cost==null?"":p.cost}"> ${esc(p.cur)}</td><td><span class="b ${st[1]}">${st[0]}</span></td><td><input class="sm" id="rs${p.id}" type="number" min="1" inputmode="numeric"> <button data-a="rs" data-v="${p.id}">Add</button></td></tr>`}).join("");
+ h+=`<div class="card tw"><div class="m">Total units in stock: <b>${tot}</b> · to correct a count, type the right number in Stock</div><table><tr><th>Category</th><th>Product</th><th>Stock</th><th>Price</th><th>Cost</th><th>Status</th><th>Restock</th></tr>${rows}</table></div>`+addCard();
+ const C=scs.slice(0,30);
+ h+=`<h3>Stock counts by staff</h3><div class="card tw"><table><tr><th>When</th><th>By</th><th>Products counted</th><th>Differences</th><th></th></tr>${C.map(x=>{const n=scDiff(x).length;return`<tr><td>${tfm(x.ts)}</td><td>${esc(nm(x.by))}</td><td>${Object.keys(x.counts||{}).length}</td><td><b style="color:var(${n?"--bad":"--ok"})">${n}</b></td><td>${x.applied?'<span class="m">Applied ✓</span> ':x.ignored?'<span class="m">Ignored</span> ':""}<button data-a="scrv" data-v="${x.id}">Review</button> <button data-a="scdel" data-v="${x.id}">${armed===x.id?"Sure?":"✕"}</button></td></tr>`}).join("")||'<tr><td class="m">No data</td></tr>'}</table></div>`;
+ const G=plogs.slice(0,40),fv=(l,f,v)=>l.field==="price"||l.field==="cost"?(v===""?"–":fmc2(((prods.find(q=>q.id===l.pid)||{}).cur)||"EGP",+v)):esc(v);
+ h+=`<h3>Product changes</h3><div class="card tw"><table><tr><th>When</th><th>By</th><th>Product</th><th>Change</th></tr>${G.map(l=>`<tr><td>${tfm(l.ts)}</td><td>${esc(nm(l.by))}</td><td>${esc(l.name)}</td><td style="white-space:normal">${l.field==="added"?`Added (stock ${esc(l.to)}, price ${esc(l.from)})`:`${FL[l.field]||esc(l.field)}: ${fv(l,l.field,l.from)} → ${fv(l,l.field,l.to)}`}</td></tr>`).join("")||'<tr><td class="m">No data</td></tr>'}</table></div>`;
+ return h;
+}
+async function editProd(t){
+ const a=t.dataset.p.split("|"),p=prods.find(x=>x.id===a[0]);if(!p)return;
+ if(!admin&&(!canP()||a[1]==="stock"||a[1]==="cost"))return;
+ let v=t.value.trim();const mark=d=>{d.edited={by:me.id,at:Date.now(),field:a[1]}};
+ if(a[1]==="stock"){const n=Math.round(+v),cur=stock(a[0]);
+  if(v===""||isNaN(n)||n<0){toast("Enter 0 or more");t.value=cur;return}if(n===cur)return;
+  const d=Object.assign({},p);delete d.id;d.opening=(+p.opening||0)+(n-cur);mark(d);
+  try{await db.doc("products/"+a[0]).set(d);plogAdd(p,"stock",cur,n);toast("Stock set to "+n+" ✓")}catch(e){er(e);t.value=cur}return}
+ if(a[1]==="cost"){const d=Object.assign({},p);delete d.id;const old=p.cost==null?"":p.cost;if(v===""){if(old==="")return;delete d.cost}else{if(isNaN(+v)||+v<0){toast("Enter 0 or more");t.value=old;return}if(+v===old)return;d.cost=+v}mark(d);
+  try{await db.doc("products/"+a[0]).set(d);plogAdd(p,"cost",old,v===""?"":+v);toast("Saved ✓")}catch(e){er(e)}return}
+ if(a[1]==="price")v=+v;
+ if(!v||(a[1]==="price"&&!(v>0))){toast("Cannot be empty");t.value=p[a[1]];return}
+ if(v===p[a[1]])return;
+ const d=Object.assign({},p);delete d.id;d[a[1]]=v;mark(d);
+ try{await db.doc("products/"+a[0]).set(d);plogAdd(p,a[1],p[a[1]],v);toast("Saved ✓")}catch(e){er(e);t.value=p[a[1]]}
+}
+async function addProd(){
+ if(!canP())return;
+ const g=i=>{const e=$("#"+i);return e?e.value.trim():""},n=g("np-n"),pr=+g("np-p");if(!n||!(pr>0))return toast("Enter name and price");
+ const d=Object.assign({cat:g("np-c")||"Other",name:n,opening:Math.max(0,Math.round(+g("np-q")||0)),price:pr,cur:$("#np-u").value,addedBy:me.id,added:Date.now()},admin&&g("np-k")!==""?{cost:+g("np-k")}:{});
+ try{await db.collection("products").add(d);plogAdd({id:"",name:n},"added",pr+" "+d.cur,d.opening);toast("Added ✓");render()}catch(e){er(e)}
+}
+async function scsave(){
+ const counts={},sys={};
+ for(const k in SC){if(k==="__note")continue;const v=SC[k];if(v===""||v==null)continue;const n=Math.round(+v);if(isNaN(n)||n<0)return toast("Enter 0 or more");if(!prods.find(p=>p.id===k))continue;counts[k]=n;sys[k]=stock(k)}
+ if(!Object.keys(counts).length)return toast("Type at least one count");
+ try{await db.collection("sc").add({ts:Date.now(),date:today(),by:me.id,counts:counts,sys:sys,note:SC.__note||""});SC={};toast(admin?"Saved ✓":"Saved ✓ – the admin will check it");render()}catch(e){er(e)}
+}
+async function scMark(k){const x=scs.find(y=>y.id===rv);if(!x)return;
+ try{if(k==="applied")for(const id of scDiff(x)){const p=prods.find(q=>q.id===id);if(!p)continue;const delta=x.counts[id]-((x.sys||{})[id]||0),before=stock(id);const d=Object.assign({},p);delete d.id;d.opening=(+p.opening||0)+delta;d.edited={by:me.id,at:Date.now(),field:"stock"};await db.doc("products/"+id).set(d);plogAdd(p,"stock",before,before+delta)}
+  const d=Object.assign({},x);delete d.id;d[k]={by:me.id,at:Date.now()};await db.doc("sc/"+x.id).set(d);toast(k==="applied"?"Stock updated ✓":"Saved ✓")}catch(e){er(e)}}
+
+/* ---------- Settings (admin) ---------- */
+const WH=/white|وايت|ابيض|أبيض|بيضاء|بيضا/i;
+function oldVisa(){const L=txs.filter(t=>t.pay==="Visa");return{W:L.filter(t=>WH.test(t.note||"")),B:L.filter(t=>!WH.test(t.note||""))}}
+function fixCard(){const{W,B}=oldVisa();if(!W.length&&!B.length)return"";
+ return`<h3>Old Visa payments</h3><div class="card" style="border-color:var(--wrn)"><p style="margin-top:0">${W.length+B.length} old payment(s) were saved as just “Visa”, without the machine.</p>
+ <div class="grid"><div class="k">→ Visa Black<b>${B.length}</b><span class="m">${n0(B.reduce((a,t)=>a+nat(t),0))} EGP</span></div><div class="k">→ Visa White<b>${W.length}</b><span class="m">${n0(W.reduce((a,t)=>a+nat(t),0))} EGP</span></div></div>
+ <p class="m">Payments with “white” in the note go to Visa White. All others go to Visa Black.</p>
+ ${W.length?`<div class="tw"><table><tr><th>Date</th><th>Item</th><th>Collected</th><th>Note</th></tr>${W.map(t=>`<tr><td>${t.date}</td><td>${esc(t.item)}</td><td>${n0(nat(t))}</td><td style="white-space:normal">${esc(t.note)}</td></tr>`).join("")}</table></div>`:""}
+ <button data-a="vfix" class="on" style="margin-top:12px;width:100%;padding:13px">${armed==="vfix"?"Sure?":"Move them now"}</button></div>`}
+async function vfix(){const{W,B}=oldVisa(),L=W.map(t=>[t,"Visa White"]).concat(B.map(t=>[t,"Visa Black"]));let n=0;
+ try{for(let i=0;i<L.length;i+=10)await Promise.all(L.slice(i,i+10).map(([t,pay])=>{const d=Object.assign({},t);delete d.id;d.pay=pay;d.payWas="Visa";n++;return db.doc("tx/"+t.id).set(d)}));toast("Saved ✓ ("+n+")");render()}catch(e){er(e);render()}}
+let LR={};
+function loadRates(){if(LR.st)return;LR.st="load";
+ fetch("https://open.er-api.com/v6/latest/EGP").then(r=>r.json()).then(j=>{if(!j||j.result!=="success"||!j.rates||!j.rates.USD||!j.rates.EUR)throw 0;
+  LR={got:Date.now(),st:"ok",USD:Math.round(100/j.rates.USD)/100,EUR:Math.round(100/j.rates.EUR)/100,at:j.time_last_update_unix?j.time_last_update_unix*1000:Date.now()};if(tab==="set"&&!typing())render();else if(cfg&&tab!=="new")bannerUpd(navUpd());else if(cfg&&built)bannerUpd(navUpd())})
+ .catch(()=>{LR={st:"err"};if(tab==="set"&&!typing())render()})}
+const rmg=()=>cfg&&cfg.rateMargin!=null&&!isNaN(+cfg.rateMargin)?+cfg.rateMargin:2;
+const sugg=c=>Math.floor(LR[c]*(1-rmg()/100)*100)/100;
+const off=(a,b)=>!b||Math.abs(a-b)/b>0.01;
+function rateAlert(){if(!admin||!cfg||!cfg.rates||LR.st!=="ok")return false;const seen=cfg.rateSeen||{};
+ return["USD","EUR"].some(c=>off(+cfg.rates[c],sugg(c))&&off(sugg(c),+seen[c]))}
+setInterval(()=>{if(LR.st==="ok"&&Date.now()-(LR.got||0)>6*3600e3){LR={};loadRates()}},600000);
+function rateCard(){loadRates();
+ const mg=`<div style="margin-top:10px">Safety margin % <input class="sm" type="number" inputmode="decimal" data-c="rateMargin" value="${rmg()}"></div>`;
+ if(LR.st!=="ok")return`<div class="card"><span class="m">${LR.st==="err"?"Could not load today’s market rate. Check the internet and open Settings again.":"Loading today’s market rate…"}</span>${mg}</div>`;
+ return`<div class="card"><b>Today’s market rate</b> <span class="m">(updated ${tfm(LR.at)})</span><div class="tw"><table><tr><th></th><th>Market</th><th>Safe rate</th><th>Your rate</th><th></th></tr>${["USD","EUR"].map(c=>{const g=sugg(c),same=Math.abs(g-cfg.rates[c])<0.01;return`<tr><td><b>1 ${c}</b></td><td>${LR[c].toFixed(2)} EGP</td><td><b>${g.toFixed(2)} EGP</b></td><td>${(+cfg.rates[c]).toFixed(2)} EGP${cfg.rates[c]>LR[c]?' <b style="color:var(--bad)">⚠ above market</b>':""}</td><td>${same?'<span class="m">Same ✓</span>':`<button data-a="userate" data-v="${c}">Use safe rate</button>`}</td></tr>`}).join("")}</table></div>${mg}
+ <p class="m">Safe rate = market rate − your safety margin. When a customer pays in dollars or euros, a lower rate means he pays a little more in USD/EUR, so you don’t lose when you change the money later. Your rate changes only when you tap “Use safe rate” or type it.</p></div>`}
+function viewSet(){
+ const inp=(p,v)=>`<input class="sm" type="number" inputmode="decimal" data-c="${esc(p)}" value="${v==null?"":v}">`;
+ let h=fixCard()+`<h3>Staff permissions</h3><div class="card"><label style="display:flex;gap:10px;align-items:center;margin:0;color:var(--fg);font-size:15px"><input type="checkbox" data-sp style="width:auto;width:22px;height:22px"${cfg.staffProducts!==false?" checked":""}> Staff can add products and edit names and prices</label></div>
+ <h3>Exchange rates (EGP per 1)</h3>${rateCard()}<div class="card row"><div>USD ${inp("rates|USD",cfg.rates.USD)}</div><div>EUR ${inp("rates|EUR",cfg.rates.EUR)}</div><div>Low stock at ${inp("low",cfg.low==null?1:cfg.low)}</div><div>Visa fee % ${inp("visaFee",vfee())}</div></div>
+ <h3>Rent prices (EGP)</h3><div class="card tw"><table><tr><th>Vehicle</th>${D.map(d=>`<th>${d}</th>`).join("")}</tr>${Object.keys(cfg.rent||{}).map(v=>`<tr><td>${esc(v)}</td>${D.map(d=>`<td>${inp("rent|"+v+"|"+d,(cfg.rent[v]||{})[d])}</td>`).join("")}</tr>`).join("")}</table></div>`;
+ return h;
+}
+function setCfg(p,v){
+ const k=p.split("|");if(v===""&&(k[0]==="rates"||k[0]==="low"||k[0]==="visaFee"||k[0]==="rateMargin"))return;
+ const c=JSON.parse(JSON.stringify(cfg));let o=c;for(let i=0;i<k.length-1;i++)o=o[k[i]]=o[k[i]]||{};
+ if(v===""||isNaN(+v))delete o[k[k.length-1]];else o[k[k.length-1]]=+v;
+ db.doc("config/main").set(c).then(()=>toast("Saved ✓")).catch(e=>{er(e);render()});
+}
+
+/* ---------- Events ---------- */
+setInterval(()=>{if(!cfg)return;if(stale&&!typing())render();else if(tab==="out")render();else if(tab==="new"&&built)bannerUpd(navUpd())},60000);
+document.addEventListener("click",e=>{
+ const b=e.target.closest("[data-a]");if(!b)return;const a=b.dataset.a,v=b.dataset.v;
+ if(a==="out"){sb.auth.signOut().then(()=>location.reload())}
+ else if(a==="lang")setLang(lang==="ar"?"en":"ar")
+ else if(a==="tab"){if(F.editId&&v!=="new")F={type:"rent",qty:1,pay:"Cash EGP"};tab=v;armed="";render()}
+ else if(a==="type"){F={type:v,qty:1,pay:F.pay,veh:F.veh,svc:F.svc,pid:F.pid,date:F.date,editId:F.editId,ok:F.ok,ou:F.ou,oq:F.oq,oi:F.oi,opid:F.opid,cust:F.cust,phone:F.phone,note:F.note,owe:F.owe};render()}
+ else if(a==="uselist"){F.ou=+v;const e=$("#ouin");if(e)e.value=F.ou;upd()}
+ else if(a==="fcancel"){F={type:"rent",qty:1,pay:"Cash EGP"};tab="tx";render()}
+ else if(a==="rng"){const d=new Date(),m=String(d.getMonth()+1).padStart(2,"0");flt.from=v==="month"?d.getFullYear()+"-"+m+"-01":today();flt.to=today();render()}
+ else if(a==="pay"){F.pay=v;F.paidT=false;F.paid="";render()}
+ else if(a==="q"){F.qty=Math.max(1,F.qty+ +v);upd()}
+ else if(a==="vc"){F.vc=Math.max(1,(+F.vc||1)+ +v);upd()}
+ else if(a==="save")save();
+ else if(a==="exp")exp();
+ else if(a==="addp")addProd();
+ else if(a==="adds"){const n=$("#ns-n").value.trim(),pv=$("#ns-p").value.trim(),p=+pv;if(!n||pv===""||!(p>=0))return toast("Enter name and price");const c=JSON.parse(JSON.stringify(cfg));c.services=c.services||{};c.services[n]=p;db.doc("config/main").set(c).then(()=>toast("Added ✓")).catch(er)}
+ else if(a==="rs"){const q=+$("#rs"+v).value;if(q>0)db.collection("tx").add({ts:Date.now(),date:today(),by:me.id,type:"restock",pid:v,qty:q}).then(()=>toast("Stock added ✓")).catch(er)}
+ else if(a==="edit"&&(()=>{const t=txs.find(x=>x.id===v);if(!t||t.type==="pay")return false;
+  const f={type:t.type,editId:t.id,date:t.date,qty:t.qty||1,pay:t.pay,paid:+(+nat(t)).toFixed(2),paidT:true,cust:t.customer||"",phone:t.phone||"",note:t.note||"",owe:!!t.owe,disc:t.discAmt!=null?t.discAmt:(t.disc||0),dcur:t.discCur||"EGP"};if(t.changeEGP!=null){Object.assign(f,{chg:true,given:t.given,chgE:t.changeEGP,chgT:true})}
+  if(t.type==="rent")Object.assign(f,{veh:t.item,dur:t.dur,vc:t.cnt||1,ok:"r|"+t.item+"|"+t.dur,ou:t.unit});
+  else if(t.type==="sale")Object.assign(f,{pid:t.pid,opid:t.pid,ok:"s|"+t.pid,ou:t.unit,oq:t.qty,oi:t.item});
+  else Object.assign(f,{type:"maint",qty:1,det:t.det||"",work:t.item,amt:t.free?t.unit:t.unit*(t.qty||1)+(+t.extra||0)});
+  F=f;tab="new";render();window.scrollTo(0,0);return true})()){}
+ else if(a==="edit"){const t=txs.find(x=>x.id===v);if(t){ed=v;E={cnt:t.cnt||1,work:t.item,amt:t.unit,date:t.date,qty:t.qty,disc:t.discAmt!=null?t.discAmt:(t.disc||0),dcur:t.discCur||"EGP",extra:t.extra||0,pay:t.pay,paid:+(+(t.paid!=null?t.paid:t.collect)).toFixed(2),cust:t.customer||"",note:t.note||""};render();window.scrollTo(0,0)}}
+ else if(a==="ret"){if(armed===v){armed="";db.collection("ret").add({tid:v,ts:Date.now(),date:today(),by:me.id}).then(()=>toast("Returned ✓")).catch(er)}else{armed=v;render()}}
+ else if(a==="ccsave")ccsave("close");
+ else if(a==="ccopen")ccsave("open");
+ else if(a==="scsave")scsave();
+ else if(a==="scrv"){rv=v;render();window.scrollTo(0,0)}
+ else if(a==="scclose"){rv=null;render()}
+ else if(a==="scapply")scMark("applied");
+ else if(a==="scign")scMark("ignored");
+ else if(a==="cchk")ccCheck(v);
+ else if(a==="ccedit"){const x=ccs.find(y=>y.id===v);if(x){cce=v;CE={note:x.note||""};CUR.forEach(c=>CE[c]=(x.cnt||{})[c]!=null?x.cnt[c]:"");render();window.scrollTo(0,0)}}
+ else if(a==="cecancel"){cce=null;CE={};render()}
+ else if(a==="cesave")ccEditSave();
+ else if(a==="mvsave")mvsave();
+ else if(a==="dlday")dlDay();
+ else if(a==="dlcash")cashReport();
+ else if(a==="rtupd"||a==="rtkeep"){if(LR.st==="ok"){const c=JSON.parse(JSON.stringify(cfg));c.rateSeen={USD:sugg("USD"),EUR:sugg("EUR")};if(a==="rtupd"){c.rates.USD=sugg("USD");c.rates.EUR=sugg("EUR")}db.doc("config/main").set(c).then(()=>toast(a==="rtupd"?"Rates updated ✓":"Saved ✓")).catch(er)}}
+ else if(a==="userate"){if(LR[v])setCfg("rates|"+v,String(sugg(v)))}
+ else if(a==="oppay"){const t=txs.find(x=>x.id===v);if(t){OP={id:v,pay:"Cash EGP",amt:Math.round(remainOf(t))};render();window.scrollTo(0,0)}}
+ else if(a==="opcancel"){OP={};render()}
+ else if(a==="opsave")opsave();
+ else if(a==="ptsave")ptsave();
+ else if(a==="ptedit"){const x=pts.find(y=>y.id===v);if(x){PT={month:x.id,egp:x.egp,visa:x.visa,insta:x.insta,usd:x.usd,eur:x.eur,exp:x.exp,cEGP:x.hasClose?x.cEGP:"",cUSD:x.hasClose?x.cUSD:"",cEUR:x.hasClose?x.cEUR:"",note:x.note||""};render();const e=document.querySelector('[data-pt="month"]');if(e)e.scrollIntoView({block:"center"})}}
+ else if(a==="ptdel"){if(armed==="pt"+v){armed="";db.doc("pt/"+v).delete().catch(er)}else{armed="pt"+v;render()}}
+ else if(a==="mvdel"){if(armed===v){armed="";db.doc("cm/"+v).delete().catch(er)}else{armed=v;render()}}
+ else if(a==="vfix"){if(armed==="vfix"){armed="";vfix()}else{armed="vfix";render()}}
+ else if(a==="ccdel"){if(armed===v){armed="";ccDel(v)}else{armed=v;render()}}
+ else if(a==="scdel"){if(armed===v){armed="";if(rv===v)rv=null;db.doc("sc/"+v).delete().then(()=>toast("Undone ✓")).catch(er)}else{armed=v;render()}}
+ else if(a==="xsave")xsave();
+ else if(a==="fxsave")fxsave();
+ else if(a==="fxdel"){if(armed===v){armed="";db.doc("fx/"+v).delete().catch(er)}else{armed=v;render()}}
+ else if(a==="cr"){const d=new Date(),m=String(d.getMonth()+1).padStart(2,"0");if(v==="today"){cr.from=cr.to=today()}else if(v==="month"){cr.from=d.getFullYear()+"-"+m+"-01";cr.to=today()}else{cr.from="2000-01-01";cr.to=today()}render()}
+ else if(a==="xexp")xexp();
+ else if(a==="xdel"){if(armed===v){armed="";db.doc("exp/"+v).delete().catch(er)}else{armed=v;render()}}
+ else if(a==="ecancel"){ed=null;render()}
+ else if(a==="esave")eSave();
+ else if(a==="rexp"){const keep=Object.assign({},flt);Object.assign(flt,{from:rf+"-01",to:rt+"-31",type:"",by:""});exp().finally(()=>Object.assign(flt,keep))}
+ else if(a==="rr"){const d=new Date(),k=x=>x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0");rt=k(d);rf=v==="1"?rt:v==="3"?k(new Date(d.getFullYear(),d.getMonth()-2,1)):d.getFullYear()+"-01";render()}
+ else if(a==="del"){if(armed===v){armed="";db.doc("tx/"+v).delete().then(()=>Promise.all(fxs.filter(x=>x.ref===v).map(x=>db.doc("fx/"+x.id).delete()))).catch(er)}else{armed=v;render()}}
+});
+document.addEventListener("input",e=>{const t=e.target,f=t.dataset.f;if(t.dataset.sc!==undefined){SC[t.dataset.sc]=t.value;return}if(t.dataset.ce!==undefined){CE[t.dataset.ce]=t.value;return}if(t.dataset.m!==undefined){M[t.dataset.m]=t.value;return}if(t.dataset.pt!==undefined){PT[t.dataset.pt]=t.value;return}if(t.dataset.op!==undefined){OP[t.dataset.op]=t.value;if(t.dataset.op==="pay"){const x=txs.find(y=>y.id===OP.id),c=pcur(t.value),r=remainOf(x);OP.amt=c==="EGP"?Math.round(r):(r/rate(c)).toFixed(2);render()}return}if(t.dataset.x!==undefined){X[t.dataset.x]=t.value;return}if(t.dataset.fx!==undefined){FX[t.dataset.fx]=t.value;return}if(t.dataset.cc!==undefined){const k=t.dataset.cc.split("|");if(k[0]==="o")CC.open[k[1]]=t.value;else if(k[0]==="n")CC.cnt[k[1]]=t.value;else CC.note=t.value;updCC();return}if(t.dataset.e){E[t.dataset.e]=t.value;if(t.dataset.e==="pay"){E.paid="";render()}return}if(!f)return;
+ F[f]=(f==="disc"||f==="extra")?(+t.value||0):f==="owe"||f==="chg"?t.checked:t.value;if(f==="chgE")F.chgT=t.value!=="";if(f==="paid")F.paidT=t.value!=="";
+ if(f==="veh")$("#dur").innerHTML=durOpts();
+ if(f==="veh")F.dur=$("#dur").value;
+ upd();
+});
+document.addEventListener("change",e=>{const t=e.target;
+ if(t.dataset.od!==undefined){onlyDiff=t.checked;render();return}
+ if(t.dataset.dr!==undefined){drd=t.value||today();return}
+ if(t.dataset.sp!==undefined){const c=JSON.parse(JSON.stringify(cfg));c.staffProducts=t.checked;db.doc("config/main").set(c).then(()=>toast("Saved ✓")).catch(x=>{er(x);render()});return}
+ if(t.dataset.l){flt[t.dataset.l]=t.value;render()}
+ else if(t.dataset.r){if(t.dataset.r==="c")rc=t.value;else if(t.dataset.r==="f"){rf=t.value||rf;if(rt<rf)rt=rf}else if(t.dataset.r==="t"){rt=t.value||rt;if(rt<rf)rf=rt}render()}
+ else if(t.dataset.c2){cr[t.dataset.c2]=t.value;render()}
+ else if(t.dataset.c)setCfg(t.dataset.c,t.value);
+ else if(t.dataset.p)editProd(t);
+});
+</script></body></html>
